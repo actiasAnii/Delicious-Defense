@@ -48,7 +48,7 @@ let config = {
         }
     },
     width: 1600,
-    height: 880, 
+    height: 840, 
     scene: [Load, Level, WinScreen, LoseScreen] //rest of gameplay scenes
 }
 
