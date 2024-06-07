@@ -44,7 +44,7 @@ class Level extends Phaser.Scene {
 
         this.finder.setGrid(defenseGrid);
 
-        let walkables = [12, 13, 14, 24, 25, 26, 36, 37, 38];
+        let walkables = [25];
 
         // Tell EasyStar which tiles can be walked on
         this.finder.setAcceptableTiles(walkables);
@@ -55,7 +55,7 @@ class Level extends Phaser.Scene {
             row.forEach((tile, x) => {
             if (walkables.includes(tile)) {
             // Assuming you have a method to highlight a tile, e.g., `highlightTile(x, y)`
-            this.highlightTile(x, y); // Implement this method to visually highlight the tile
+            //this.highlightTile(x, y); // Implement this method to visually highlight the tile
             }
         });
         });
@@ -164,8 +164,8 @@ class Level extends Phaser.Scene {
         let tweens = [];
     
         for (let i = 0; i < path.length - 1; i++) {
-            let ex = path[i + 1].x;
-            let ey = path[i + 1].y;
+            let ex = path[i + 1].x + Phaser.Math.Between (-5, 5);
+            let ey = path[i + 1].y + Phaser.Math.Between (-2, 2);
             tweens.push({
                 targets: character,
                 x: ex,

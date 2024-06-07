@@ -3,16 +3,17 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "Level.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
         "Level.tmj": {
             "scale": 1.5,
-            "selectedLayer": 2,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 295.33333333333326,
-                "y": 237.99999999999997
+                "x": 379.3333333333333,
+                "y": 195.33333333333331
             }
         },
         "Level.tmj#tilemap-battle_packed": {
@@ -21,22 +22,39 @@
         "Level.tmj#tilemap-town_packed": {
             "scaleInDock": 2,
             "scaleInEditor": 1
+        },
+        "Level.tmx": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 229.5,
+                "y": 195.5
+            }
+        },
+        "Level.tmx#tilemap-battle_packed": {
+            "scaleInDock": 1
+        },
+        "Level.tmx#tilemap-town_packed": {
+            "scaleInDock": 1
         }
     },
     "last.exportedFilePath": "C:/Users/cbrsk/Desktop/School/CMPM120/Delicious-Defense/assets",
     "last.imagePath": "C:/Users/cbrsk/Desktop/School/CMPM120/Delicious-Defense/assets",
     "map.height": 55,
-    "map.lastUsedExportFilter": "Tiled map files (*.tmx *.xml)",
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "json",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "map.width": 100,
     "openFiles": [
+        "Level.tmj",
+        "Level.tmx"
     ],
     "project": "Level.tiled-project",
     "property.type": "bool",
     "recentFiles": [
-        "Level.tmj"
+        "Level.tmj",
+        "Level.tmx"
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {
