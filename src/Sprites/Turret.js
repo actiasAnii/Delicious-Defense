@@ -13,7 +13,6 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         this.scene = scene;
         this.RANGE = range; //detection range for enemies
         this.target = null; //current target enemy
-        this.ROTATION_SPEED = 0.01; //speed of turret rotation
 
         //debug eable physics body for the turret
         this.body.setImmovable(true);
@@ -34,7 +33,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
     findTarget() {
         let enemies = my.enemies.getChildren();
         let closestEnemy = null;
-        let closestDistance = this.range;
+        let closestDistance = this.RANGE;
 
         enemies.forEach(enemy => {
             let distance = Phaser.Math.Distance.Between(this.x, this.y, enemy.x, enemy.y);
