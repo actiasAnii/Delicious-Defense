@@ -50,6 +50,50 @@ class Load extends Phaser.Scene {
     {
         //create animations
 
+        //opportunity walking animation
+        this.anims.create({
+            key: 'oppyWalk',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 21,
+                end: 22,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 5,
+            repeat: -1
+        });
+
+        //spirit animation
+        this.anims.create({
+            key: 'spiritFlap',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 24,
+                end: 26,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 5,
+            repeat: -1
+        });
+
+        //sojourner walking animation
+        this.anims.create({
+            key: 'sojWalk',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 15,
+                end: 16,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 5,
+            repeat: -1
+        });
+
+        ///enemy animations
+
         //pass to next scene
         this.scene.start("mainLevel");
     }

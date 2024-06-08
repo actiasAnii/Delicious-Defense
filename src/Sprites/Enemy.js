@@ -1,15 +1,35 @@
 class Enemy extends Phaser.Physics.Arcade.Sprite
 {
-    constructor(scene, x, y, frame, finder, goalX, goalY)
+    constructor(scene, x, y, type, finder, goalX, goalY)
     {
-        let frameFile = "tile_00" + frame + ".png";
-        super(scene, x, y, "platformer_characters", frameFile);
 
-        //add sprite to scene
-        this.setScale(0.5).setOrigin(0,0);
-        scene.add.existing(this);
-        scene.physics.add.existing(this); 
-        this.flipX = true;
+        super(scene, x, y, "platformer_characters", "tile_0021.png");
+
+        //define unique characteristics first
+        switch(type)
+        {
+            case 0: //opportunity
+                this.SPEED = Phaser.Math.Between (700, 750);
+                this.animation = "oppyWalk";
+                this.scorePoints;
+                this.health;
+                break;
+
+            case 1: //spirit
+                this.SPEED = Phaser.Math.Between (300, 350);
+                this.animation = "spiritFlap";
+                this.scorePoints;
+                this.health;
+                break;
+            
+            case 2: //
+                this.SPEED = Phaser.Math.Between (500, 600);
+                this.animation = "sojWalk";
+                this.scorePoints;
+                this.health;
+                break;
+
+        }
 
         //set initial vars
         this.SCENE = scene;
@@ -19,11 +39,15 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         this.TILESIZE = 16;
         this.ORGINX = x;
         this.ORGINY = y;
-        
-        //assign speed and health in a switch
 
 
-        //have enemy start moving
+        //add sprite to scene
+        this.setScale(0.6).setOrigin(0,0);
+        scene.add.existing(this);
+        scene.physics.add.existing(this); 
+        this.flipX = true;
+        this.anims.play(this.animation, true);
+
         console.log(this.x, this.y);
 
 
@@ -75,14 +99,18 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 targets: this,
                 x: ex,
                 y: ey,
-                duration: 200,
-                ease: 'Linear'
+                duration: this.SPEED,
+                ease: 'Quadratic.Out'
             });
         }
     
         this.scene.tweens.chain({
             targets: this,
-            tweens: tweens
+            tweens: tweens,
+            onComplete: () => {
+                this.destroy();
+            }
+
         });
     }
 

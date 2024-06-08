@@ -72,8 +72,11 @@ class Level extends Phaser.Scene {
 
 
         //temp test enemy here
-        my.sprite.enemy = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), "21", this.finder, this.GOALX, this.GOALY);
-        my.sprite.enemy.findPath();
+        my.sprite.enemyFirst = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder, this.GOALX, this.GOALY);
+        my.sprite.enemyFirst.findPath();
+
+        my.sprite.enemy2nd = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder, this.GOALX, this.GOALY);
+        my.sprite.enemy2nd.findPath();
 
 
     }
