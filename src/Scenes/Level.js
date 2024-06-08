@@ -70,14 +70,16 @@ class Level extends Phaser.Scene {
         //create donut goal
         my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0,0).setScale(1.5);
 
+        //temp test turret here
+        my.sprite.turret = new Turret(this, this.tileXtoWorld(5), this.tileYtoWorld(19), 200);
 
+
+        my.enemies = this.add.group();
         //temp test enemy here
-        my.sprite.enemyFirst = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder, this.GOALX, this.GOALY);
+        //later make filled enemy group and waves
+        my.sprite.enemyFirst = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder);
         my.sprite.enemyFirst.findPath();
-
-        my.sprite.enemy2nd = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder, this.GOALX, this.GOALY);
-        my.sprite.enemy2nd.findPath();
-
+        my.enemies.add(my.sprite.enemyFirst);
 
     }
 
@@ -133,6 +135,7 @@ class Level extends Phaser.Scene {
 
     update()
     {
+        my.sprite.turret.update();
 
     }
 

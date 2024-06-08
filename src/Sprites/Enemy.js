@@ -1,6 +1,6 @@
 class Enemy extends Phaser.Physics.Arcade.Sprite
 {
-    constructor(scene, x, y, type, finder, goalX, goalY)
+    constructor(scene, x, y, type, finder)
     {
 
         super(scene, x, y, "platformer_characters", "tile_0021.png");
@@ -34,8 +34,6 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         //set initial vars
         this.SCENE = scene;
         this.finder = finder;
-        this.GOALX = goalX;
-        this.GOALY = goalY;
         this.TILESIZE = 16;
         this.ORGINX = x;
         this.ORGINY = y;
@@ -62,8 +60,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         let fromY = Math.floor(this.ORGINY / this.TILESIZE);
     
         // Convert goal position from pixels to grid coordinates
-        let toX = Math.floor(this.GOALX / this.TILESIZE);
-        let toY = Math.floor(this.GOALY / this.TILESIZE);
+        let toX = Math.floor(my.sprite.donutGoal.x / this.TILESIZE);
+        let toY = Math.floor(my.sprite.donutGoal.y / this.TILESIZE);
     
         console.log('Going from (' + fromX + ',' + fromY + ') to (' + toX + ',' + toY + ')');
     
