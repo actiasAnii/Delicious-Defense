@@ -9,6 +9,8 @@ class Level extends Phaser.Scene {
     {
         this.SCALE = 2.1;
         this.TILESIZE = 16;
+        this.GOALX = this.tileXtoWorld(46);
+        this.GOALY = this.tileYtoWorld(17.5);
 
     }
 
@@ -66,14 +68,12 @@ class Level extends Phaser.Scene {
 
 
         //create donut goal
-        my.sprite.donutGoal = this.add.sprite(this.tileXtoWorld(46), this.tileYtoWorld(17), "donut").setOrigin(0,0).setScale(1.5);
+        my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0,0).setScale(1.5);
 
 
         //temp test enemy here
-        my.sprite.enemy = this.add.sprite(this.tileXtoWorld(2), this.tileYtoWorld(24), "platformer_characters", "tile_0021.png").setOrigin(0,0).setScale(0.6);
-        my.sprite.enemy.flipX = true;
-        console.log(my.sprite.enemy.x, my.sprite.enemy.y);
-        this.findPath(my.sprite.enemy.x, my.sprite.enemy.y);
+        my.sprite.enemy = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), "21", this.finder, this.GOALX, this.GOALY);
+        my.sprite.enemy.findPath();
 
 
     }
@@ -126,59 +126,6 @@ class Level extends Phaser.Scene {
 
     tileYtoWorld(tileY) {
         return tileY * this.TILESIZE;
-    }
-
-    findPath(enemyX, enemyY) {
-        // Convert enemy position from pixels to grid coordinates
-        let fromX = Math.floor(enemyX / this.TILESIZE);
-        let fromY = Math.floor(enemyY / this.TILESIZE);
-    
-        // Convert goal position from pixels to grid coordinates
-        let toX = Math.floor(my.sprite.donutGoal.x / this.TILESIZE);
-        let toY = Math.floor(my.sprite.donutGoal.y / this.TILESIZE);
-    
-        console.log('Going from (' + fromX + ',' + fromY + ') to (' + toX + ',' + toY + ')');
-    
-        this.finder.findPath(fromX, fromY, toX, toY, (path) => {
-            if (path === null) {
-                console.warn("Path was not found.");
-            } else {
-                console.log(path);
-    
-                // Convert path back to pixel coordinates
-                let pixelPath = path.map(step => ({
-                    x: step.x * this.TILESIZE,
-                    y: step.y * this.TILESIZE
-                }));
-    
-                this.moveCharacter(pixelPath, my.sprite.enemy);
-            }
-        });
-    
-        this.finder.calculate(); // Ask EasyStar to compute the path
-    }
-
-    moveCharacter(path, character) {
-        if (path.length === 0) return;
-    
-        let tweens = [];
-    
-        for (let i = 0; i < path.length - 1; i++) {
-            let ex = path[i + 1].x + Phaser.Math.Between (-5, 5);
-            let ey = path[i + 1].y + Phaser.Math.Between (-2, 2);
-            tweens.push({
-                targets: character,
-                x: ex,
-                y: ey,
-                duration: 200,
-                ease: 'Linear'
-            });
-        }
-    
-        this.tweens.chain({
-            targets: character,
-            tweens: tweens
-        });
     }
 
     update()
