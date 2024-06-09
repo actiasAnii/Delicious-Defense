@@ -7,21 +7,21 @@ class Projectile extends Phaser.Physics.Arcade.Sprite
         //set initial vars
         //might pass in a couple
         this.SPEED = 250;
-        this.lifespan = 2000;
         this.scene = scene;
 
         //handle going offscreen
         this.scene.physics.add.existing(this);
         this.setCollideWorldBounds(true);
-        this.on('worldbounds', this.onWorldBounds, this);
-
 
     }
 
     //helpers
-    onWorldBounds() {
+
+    disableProj()
+    {
+        console.log("disabled");
         this.setActive(false);
-        this.setVisible(false);
+        this.setVisible(false); 
     }
 
     //handle firing bullets
@@ -36,11 +36,11 @@ class Projectile extends Phaser.Physics.Arcade.Sprite
 
     update()
     {
-        this.lifespan--;
-        if (this.lifespan <= 0) {
-            this.setActive(false);
-            this.setVisible(false);
-        }
+
+        if (this.y >= this.scene.game.config.height + this.displayHeight/2 || this.y <= 0 - this.displayHeight/2)
+            {
+                this.disableProj();
+            }
 
     }
 }

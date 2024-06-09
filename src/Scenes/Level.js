@@ -73,13 +73,21 @@ class Level extends Phaser.Scene {
         //temp test turret here
         my.sprite.turret = new Turret(this, this.tileXtoWorld(5), this.tileYtoWorld(19), 150);
 
-
+        //group to hold enemies
         my.enemies = this.add.group();
         //temp test enemy here
-        //later make filled enemy group and waves
+        //later make waves
         my.sprite.enemyFirst = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder);
         my.sprite.enemyFirst.findPath();
         my.enemies.add(my.sprite.enemyFirst);
+
+
+        //move to turret creation function after that is implemented
+        this.physics.add.overlap(my.sprite.turret.projectiles, my.enemies, (enemy, projectile) => { //why are u like this phaser i hate you
+            console.log("collision detected");
+            projectile.y = 5000;
+            //enemy.destroy();
+        });
 
     }
 

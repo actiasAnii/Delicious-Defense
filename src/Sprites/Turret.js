@@ -38,9 +38,9 @@ class Turret extends Phaser.Physics.Arcade.Sprite
    
     update() {
         this.findTarget();
+        this.rotateTurret();
 
         if (this.target) {
-            this.rotateTurret();
 
             //reduce cooldown
             this.cooldown--;
@@ -49,12 +49,10 @@ class Turret extends Phaser.Physics.Arcade.Sprite
             //make turret shoot
             if (this.cooldown <= 0) //after cooldown time has passed
                 {
-                    console.log("met cooldown. attempting to fire")
                     //fire a projectile
                     let proj = this.projectiles.get();
                     if (proj) 
                         {
-                            console.log("attempting to fire");
                             proj.fire(this.x, this.y, this.target);
 
                             //reset cooldown to another random number
@@ -86,12 +84,18 @@ class Turret extends Phaser.Physics.Arcade.Sprite
 
     //rotate the turret to face the target enemy
     rotateTurret() {
-        //if no target, don't rotate
+        let angle;
+        //if no target, point straight up
         if (!this.target)
-            return;
-    
-        //calculate angle between turret and target
-        let angle = Phaser.Math.Angle.Between(this.x, this.y, this.target.x, this.target.y);
+            {
+                angle = -Math.PI / 2;
+            }
+        else 
+            {
+                //calculate angle between turret and target
+                angle = Phaser.Math.Angle.Between(this.x, this.y, this.target.x, this.target.y);
+
+            }
     
         //adjust the angle so that the top of the turret points towards the target
         angle += Math.PI / 2;
