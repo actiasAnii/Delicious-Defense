@@ -71,7 +71,7 @@ class Level extends Phaser.Scene {
         my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0,0).setScale(1.5);
 
         //temp test turret here
-        my.sprite.turret = new Turret(this, this.tileXtoWorld(5), this.tileYtoWorld(19), 200);
+        my.sprite.turret = new Turret(this, this.tileXtoWorld(5), this.tileYtoWorld(19), 150);
 
 
         my.enemies = this.add.group();

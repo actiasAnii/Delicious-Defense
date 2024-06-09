@@ -11,11 +11,28 @@ class Turret extends Phaser.Physics.Arcade.Sprite
 
         //set initial vars
         this.scene = scene;
-        this.RANGE = range; //detection range for enemies
         this.target = null; //current target enemy
+        //these will be set in a switch
+        this.RANGE = range; //detection range for enemies
+        this.cooldown = 10; //for firing delay
+        this.DAMAGE = 1;
+        this.PROJ_TEXTURE = "p_burger";
 
-        //debug eable physics body for the turret
+        //debug enable physics body for the turret
         this.body.setImmovable(true);
+
+        //make a projectile group for this turret, pass correct sprite
+        this.projectiles = this.scene.physics.add.group({ 
+            classType: Projectile, 
+            runChildUpdate: true, 
+            createCallback: (proj) => {
+                proj.setTexture(this.PROJ_TEXTURE).setScale(0.5);
+            }
+        });
+
+        this.anims.play("turrChara", true);
+
+        console.log(this.x, this.y);
     }
 
    
@@ -24,10 +41,31 @@ class Turret extends Phaser.Physics.Arcade.Sprite
 
         if (this.target) {
             this.rotateTurret();
-        }
 
-        //add firing
+            //reduce cooldown
+            this.cooldown--;
+    
+    
+            //make turret shoot
+            if (this.cooldown <= 0) //after cooldown time has passed
+                {
+                    console.log("met cooldown. attempting to fire")
+                    //fire a projectile
+                    let proj = this.projectiles.get();
+                    if (proj) 
+                        {
+                            console.log("attempting to fire");
+                            proj.fire(this.x, this.y, this.target);
+
+                            //reset cooldown to another random number
+                            this.cooldown = 200;
+                        }
+                }
+            }
+
+
     }
+
 
     //find the closest enemy within range
     findTarget() {

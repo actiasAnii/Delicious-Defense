@@ -40,6 +40,8 @@ class Load extends Phaser.Scene {
         this.load.image("donut", "donut_classic.png");
         this.load.image("p_burger", "projectile_burger.png");
 
+        this.load.image("heart", "health_full.png");
+
         //load font
 
         //load audio assets
@@ -48,9 +50,11 @@ class Load extends Phaser.Scene {
 
     create()
     {
-        //create animations
+        ///////////////create animations
 
-        //opportunity walking animation
+        //////enemy animations
+
+        //opportunity walking anim
         this.anims.create({
             key: 'oppyWalk',
             frames: this.anims.generateFrameNames('platformer_characters', {
@@ -64,7 +68,7 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
-        //spirit animation
+        //spirit anim
         this.anims.create({
             key: 'spiritFlap',
             frames: this.anims.generateFrameNames('platformer_characters', {
@@ -78,7 +82,7 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
-        //sojourner walking animation
+        //sojourner walking anim
         this.anims.create({
             key: 'sojWalk',
             frames: this.anims.generateFrameNames('platformer_characters', {
@@ -92,9 +96,38 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
-        ///enemy animations
+        //////turret animations
 
-        //pass to next scene
+        //chara turret anim
+        this.anims.create({
+            key: 'turrChara',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 0,
+                end: 1,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 2,
+            repeat: -1
+        });
+
+        //enif turret anim
+        this.anims.create({
+            key: 'turrEnif',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 4,
+                end: 5,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 2,
+            repeat: -1
+        });
+        
+
+        ///////pass to next scene
         this.scene.start("mainLevel");
     }
 
