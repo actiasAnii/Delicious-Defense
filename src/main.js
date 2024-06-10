@@ -47,8 +47,8 @@ let config = {
             fixedStep: false
         }
     },
-    width: 1600,
-    height: 840, 
+    width: 1840,
+    height: 872, 
     scene: [Load, Level, WinScreen, LoseScreen] //rest of gameplay scenes
 }
 

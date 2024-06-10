@@ -42,7 +42,10 @@ class Load extends Phaser.Scene {
 
         this.load.image("heart", "health_full.png");
 
+        this.load.image("sparkle", "explosion_1.png");
+
         //load font
+        this.load.bitmapFont("thick", "thick_8x8.png", "thick_8x8.xml");
 
         //load audio assets
 
@@ -123,6 +126,20 @@ class Load extends Phaser.Scene {
                 zeroPad: 4
             }),
             frameRate: 2,
+            repeat: -1
+        });
+
+        //main character anim :3
+        this.anims.create({
+            key: 'friskHop',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 6,
+                end: 7,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 1,
             repeat: -1
         });
         

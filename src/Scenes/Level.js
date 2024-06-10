@@ -9,8 +9,8 @@ class Level extends Phaser.Scene {
     {
         this.SCALE = 2.1;
         this.TILESIZE = 16;
-        this.GOALX = this.tileXtoWorld(46);
-        this.GOALY = this.tileYtoWorld(17.5);
+        this.GOALX = this.tiletoWorld(54);
+        this.GOALY = this.tiletoWorld(18.5);
 
     }
 
@@ -69,7 +69,10 @@ class Level extends Phaser.Scene {
 
 
         //create donut goal
-        my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0,0).setScale(1.5);
+        my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0.5).setScale(1.5);
+        //cute lil player stand it by the donut. like commander of the troops
+        my.sprite.playerStandIn = this.add.sprite(this.tiletoWorld(54), this.tiletoWorld(20), "platformer_characters", "tile_0006.png").setScale(0.8);
+        my.sprite.playerStandIn.anims.play("friskHop");
 
         //group to hold enemies and turrets
         my.turrets = this.add.group({ 
@@ -80,14 +83,14 @@ class Level extends Phaser.Scene {
 
         //temp test enemy here
         //later make waves
-        my.sprite.enemyFirst = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder);
+        my.sprite.enemyFirst = new Enemy(this, this.tiletoWorld(10), this.tiletoWorld(24), 1, this.finder);
         my.sprite.enemyFirst.findPath();
 
         my.enemies.add(my.sprite.enemyFirst);
 
+        ////placing mode elements
         this.placingMode = false;
         this.highlights = [];
-
         this.gridGraphics; 
 
         this.input.keyboard.on('keydown-P', () => {
@@ -95,7 +98,13 @@ class Level extends Phaser.Scene {
         }, this);
 
         this.input.on('pointerdown', this.placeTurret, this);
+        this.turretSelected = 1;
 
+        this.createPopUp();
+
+        my.text.placementInstructions = this.add.bitmapText(this.tiletoWorld(28), this.tiletoWorld(25.5), "thick", "click a green tile to place a new turret or click an existing turret with 4 selected to upgrade!!").
+        setOrigin(0.5).setScale(0.8).setDepth(1000);
+        my.text.placementInstructions.setVisible(false);
     }
 
 
@@ -208,7 +217,7 @@ class Level extends Phaser.Scene {
         console.log(i);
         console.log(j);
     
-        // Check if the tile is placeable
+        //check if the tile is placeable
         if (this.placeableTiles[i][j]) 
         {
             let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, 200);
@@ -221,10 +230,11 @@ class Level extends Phaser.Scene {
                 enemy.takeDamage();
             });
     
-            // Mark the tile as non-placeable
+            //mark the tile as non-placeable
             this.placeableTiles[i][j] = false;
+            //potentially mark more as nonplaceable
     
-            // Remove highlight from the placed tile
+            //reset placing mode to update it
             if (this.placingMode) {
                 this.togglePlacingMode();
                 this.togglePlacingMode();
@@ -254,6 +264,10 @@ class Level extends Phaser.Scene {
 
         this.gridGraphics = this.drawGrid();
 
+        my.text.placementInstructions.setVisible(true);
+
+        this.popUpContainer.setVisible(true);
+
         this.placingMode = true;
         for (let y = 0; y < this.placeableTiles.length; y++) {
             for (let x = 0; x < this.placeableTiles[y].length; x++) {
@@ -275,15 +289,68 @@ class Level extends Phaser.Scene {
         this.highlights.forEach(highlight => highlight.destroy());
         this.highlights = [];
         this.gridGraphics.clear();
+        this.popUpContainer.setVisible(false);
+        my.text.placementInstructions.setVisible(false);
 
     }
 
-    tileXtoWorld(tileX) {
+    tiletoWorld(tileX) {
         return tileX * this.TILESIZE;
     }
 
-    tileYtoWorld(tileY) {
-        return tileY * this.TILESIZE;
+
+    //pop up turret creation menu
+    createPopUp() {
+        //use container to make handling easier :3
+        this.popUpContainer = this.add.container(0,0);
+        //graphics object for the background
+        this.popUpBackground = this.add.graphics();
+        this.popUpBackground.fillStyle(0xfab49b, 0.9);
+        this.popUpBackground.fillRoundedRect(0, 0, this.tiletoWorld(10), this.tiletoWorld(12), 10); // Adjust size and position as needed
+        this.popUpContainer.add(this.popUpBackground);
+
+        //explanation text
+        this.explanationText = this.add.bitmapText(this.tiletoWorld(5), this.tiletoWorld(1), "thick", " press num key to select\ntype of turret to create").setOrigin(0.5).setScale(0.75);
+        this.popUpContainer.add(this.explanationText);
+
+        ////descriptions of each turret type 
+        //chara
+        this.charaKey = this.add.sprite(this.tiletoWorld(2), this.tiletoWorld(2.5), "platformer_characters", "tile_0000.png").setScale(0.85);
+        this.charaTitle = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(1.75), "thick", "1 - CHARA").setOrigin(0).setScale(0.7);
+        this.charaDesc = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(2.25), "thick", "cost: 50\nbase speed: medium\nbase damage: 1").setOrigin(0).setScale(0.6);
+        this.popUpContainer.add(this.charaDesc); this.popUpContainer.add(this.charaTitle); this.popUpContainer.add(this.charaKey);
+
+        //enif 
+        this.enifKey = this.add.sprite(this.tiletoWorld(2), this.tiletoWorld(5), "platformer_characters", "tile_0004.png").setScale(0.85);
+        this.enifTitle = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(4.25), "thick", "2 - ENIF").setOrigin(0).setScale(0.7);
+        this.enifDesc = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(4.75), "thick", "cost: 80\nbase speed: fast\nbase damage: 1").setOrigin(0).setScale(0.6);
+        this.popUpContainer.add(this.enifDesc); this.popUpContainer.add(this.enifTitle); this.popUpContainer.add(this.enifKey);
+
+        //rigel
+        this.rigelKey = this.add.sprite(this.tiletoWorld(2), this.tiletoWorld(7.5), "platformer_characters", "tile_0002.png").setScale(0.85);
+        this.rigelTitle = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(6.75), "thick", "3 - RIGEL").setOrigin(0).setScale(0.7);
+        this.rigelDesc = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(7.25), "thick", "cost:80 \nbase speed: slow\nbase damage: 2").setOrigin(0).setScale(0.6);
+        this.popUpContainer.add(this.rigelDesc); this.popUpContainer.add(this.rigelTitle); this.popUpContainer.add(this.rigelKey);
+
+        //orr
+        this.upgradeKey = this.add.sprite(this.tiletoWorld(2), this.tiletoWorld(9.75), "sparkle").setScale(0.85);
+        this.upgradeTitle = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(9.25), "thick", "4 - UPGRADE").setOrigin(0).setScale(0.7);
+        this.upgradeText = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(9.75), "thick", "cost:50\nupgrade existing turret").setOrigin(0).setScale(0.6);
+        this.popUpContainer.add(this.upgradeText); this.popUpContainer.add(this.upgradeTitle); this.popUpContainer.add(this.upgradeKey);
+        
+
+        //curent selection
+        this.currentText = this.add.bitmapText(this.tiletoWorld(5), this.tiletoWorld(11.25), "thick", " current selection: " + this.turretSelected).setOrigin(0.5).setScale(0.75);
+        this.popUpContainer.add(this.currentText);
+
+        //close instructions
+        /*this.closeText = this.add.bitmapText(this.tiletoWorld(5), this.tiletoWorld(11.6), "thick", "press x to close this menu").setOrigin(0.5).setScale(0.5);
+        this.popUpContainer.add(this.closeText);*/
+
+        //set position and depth
+        this.popUpContainer.setPosition(16, 16).setDepth(10000);
+        //initially hide the pop-up
+        this.popUpContainer.setVisible(false);
     }
 
     update()
