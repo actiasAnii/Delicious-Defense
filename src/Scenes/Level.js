@@ -90,7 +90,8 @@ class Level extends Phaser.Scene {
         this.placingMode = false;
         this.highlights = [];
 
-        //
+        this.gridGraphics; 
+
         this.input.keyboard.on('keydown-P', () => {
             this.togglePlacingMode();
         }, this);
@@ -130,12 +131,10 @@ class Level extends Phaser.Scene {
                 if (tile.properties.tp && !overlap.properties.here)
                 {
                     placeableTiles[y][x] = true;
-                    //this.highlightTile(x, y);
                 }
                 else
                 {
                     placeableTiles[y][x] = false;
-                    //this.subtractTile(x, y);
 
                 }
             }
@@ -144,50 +143,29 @@ class Level extends Phaser.Scene {
 
     }
 
-    togglePlacingMode()
+    drawGrid()
     {
-        console.log("attempting to toggle placing mode")
-        if (this.placingMode == true)
+        console.log('HELLOOOOOOO????');
+        let graphics = this.add.graphics();
+        graphics.lineStyle(1, 0xffffff, 0.5);  //set the line style (color and alpha)
+
+        // Vertical lines
+        for (let x = 0; x <= this.map.widthInPixels; x += this.TILESIZE) 
         {
-            this.disablePlacingMode();
-        }
-        else 
-        {
-            this.enablePlacingMode();
-
+            graphics.lineBetween(x, 0, x, this.map.heightInPixels);
         }
 
-    }
-    
-    //turn on grid and highlights. maybe also change ui to show relevant information
-    enablePlacingMode()
-    {
-        console.log("enabling pm");
-        this.placingMode = true;
-        for (let y = 0; y < this.placeableTiles.length; y++) {
-            for (let x = 0; x < this.placeableTiles[y].length; x++) {
-                if (this.placeableTiles[y][x]) {
-                    this.highlightTile(x, y);
-                } else {
-                    this.notThisTile(x, y);
-                }
-            }
+        // Horizontal lines
+        for (let y = 0; y <= this.map.heightInPixels; y += this.TILESIZE) {
+            graphics.lineBetween(0, y, this.map.widthInPixels, y);
+            
         }
 
+        graphics.strokePath();
+        return graphics;
     }
 
-    //turn off grid and highlights
-    disablePlacingMode()
-    {
-        console.log("disabling pm");
-        this.placingMode = false;
-        this.highlights.forEach(highlight => highlight.destroy());
-        this.highlights = [];
-
-    }
-    
-
-    // layersToGrid
+     // layersToGrid
     //
     // Uses the tile layer information in this.map and outputs
     // an array which contains the tile ids of the visible tiles on screen.
@@ -217,6 +195,51 @@ class Level extends Phaser.Scene {
         });
 
         return grid;
+    }
+
+    togglePlacingMode()
+    {
+        if (this.placingMode == true)
+        {
+            this.disablePlacingMode();
+        }
+        else 
+        {
+            this.enablePlacingMode();
+
+        }
+
+    }
+    
+    //turn on grid and highlights. maybe also change ui to show relevant information
+    enablePlacingMode()
+    {
+        console.log("enabling pm");
+
+        this.gridGraphics = this.drawGrid();
+
+        this.placingMode = true;
+        for (let y = 0; y < this.placeableTiles.length; y++) {
+            for (let x = 0; x < this.placeableTiles[y].length; x++) {
+                if (this.placeableTiles[y][x]) {
+                    this.highlightTile(x, y);
+                } else {
+                    this.notThisTile(x, y);
+                }
+            }
+        }
+
+    }
+
+    //turn off grid and highlights
+    disablePlacingMode()
+    {
+        console.log("disabling pm");
+        this.placingMode = false;
+        this.highlights.forEach(highlight => highlight.destroy());
+        this.highlights = [];
+        this.gridGraphics.clear();
+
     }
 
     tileXtoWorld(tileX) {
