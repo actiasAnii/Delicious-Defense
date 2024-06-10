@@ -45,6 +45,9 @@ class Level extends Phaser.Scene {
 
         let walkables = [25];
         this.placeableTiles = this.getPlaceables();
+        console.log(this.placeableTiles);
+        console.log(game.config.height);
+        console.log(game.config.width);
 
         // Tell EasyStar which tiles can be walked on
         this.finder.setAcceptableTiles(walkables);
@@ -68,24 +71,19 @@ class Level extends Phaser.Scene {
         //create donut goal
         my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0,0).setScale(1.5);
 
-        //temp test turret here
-        my.sprite.turret = new Turret(this, this.tileXtoWorld(5), this.tileYtoWorld(19), 150);
-
-        //group to hold enemies
+        //group to hold enemies and turrets
+        my.turrets = this.add.group({ 
+            classType: Turret, 
+            runChildUpdate: true
+        });
         my.enemies = this.add.group();
+
         //temp test enemy here
         //later make waves
         my.sprite.enemyFirst = new Enemy(this, this.tileXtoWorld(2), this.tileYtoWorld(24), 1, this.finder);
         my.sprite.enemyFirst.findPath();
+
         my.enemies.add(my.sprite.enemyFirst);
-
-
-        //move to turret creation function after that is implemented
-        this.physics.add.overlap(my.sprite.turret.projectiles, my.enemies, (enemy, projectile) => { //why are u like this phaser i hate you
-            console.log("collision detected");
-            projectile.y = 5000;
-            enemy.takeDamage();
-        });
 
         this.placingMode = false;
         this.highlights = [];
@@ -95,6 +93,8 @@ class Level extends Phaser.Scene {
         this.input.keyboard.on('keydown-P', () => {
             this.togglePlacingMode();
         }, this);
+
+        this.input.on('pointerdown', this.placeTurret, this);
 
     }
 
@@ -143,9 +143,9 @@ class Level extends Phaser.Scene {
 
     }
 
+    //draw grid on top of the map
     drawGrid()
     {
-        console.log('HELLOOOOOOO????');
         let graphics = this.add.graphics();
         graphics.lineStyle(1, 0xffffff, 0.5);  //set the line style (color and alpha)
 
@@ -197,6 +197,42 @@ class Level extends Phaser.Scene {
         return grid;
     }
 
+    //create a new turret
+    placeTurret(pointer) {
+        console.log("attempting to place turret");
+        console.log(pointer.x);
+        console.log(pointer.y);
+        let conversion = this.TILESIZE * this.SCALE;
+        let i = Math.floor(pointer.y / conversion);
+        let j = Math.floor(pointer.x / conversion);
+        console.log(i);
+        console.log(j);
+    
+        // Check if the tile is placeable
+        if (this.placeableTiles[i][j]) 
+        {
+            let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, 200);
+            my.turrets.add(turret);
+
+            //handle collision between this turret and an enemy
+            this.physics.add.overlap(turret.projectiles, my.enemies, (enemy, projectile) => { //why are u like this phaser i hate you
+                console.log("collision detected");
+                projectile.y = 5000;
+                enemy.takeDamage();
+            });
+    
+            // Mark the tile as non-placeable
+            this.placeableTiles[i][j] = false;
+    
+            // Remove highlight from the placed tile
+            if (this.placingMode) {
+                this.togglePlacingMode();
+                this.togglePlacingMode();
+            }
+        }
+    }
+
+    //toggle placing mode correctly based on if placing mode is true
     togglePlacingMode()
     {
         if (this.placingMode == true)
@@ -252,7 +288,6 @@ class Level extends Phaser.Scene {
 
     update()
     {
-        my.sprite.turret.update();
 
     }
 
