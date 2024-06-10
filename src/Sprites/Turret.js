@@ -35,38 +35,8 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         console.log(this.x, this.y);
     }
 
-   
-    update() {
-        this.findTarget();
-        this.rotateTurret();
-
-        if (this.target) {
-
-            //reduce cooldown
-            this.cooldown--;
-    
-    
-            //make turret shoot
-            if (this.cooldown <= 0) //after cooldown time has passed
-                {
-                    //fire a projectile
-                    let proj = this.projectiles.get();
-                    if (proj) 
-                        {
-                            proj.fire(this.x, this.y, this.target);
-
-                            //reset cooldown to another random number
-                            this.cooldown = 200;
-                        }
-                }
-            }
-
-
-    }
-
-
-    //find the closest enemy within range
-    findTarget() {
+       //find the closest enemy within range
+       findTarget() {
         let enemies = my.enemies.getChildren();
         let closestEnemy = null;
         let closestDistance = this.RANGE;
@@ -102,5 +72,36 @@ class Turret extends Phaser.Physics.Arcade.Sprite
     
         //set the angle
         this.setRotation(angle);
+    }
+
+   
+    update() {
+
+        //handle rotation
+        this.findTarget();
+        this.rotateTurret();
+
+        if (this.target) {
+
+            //reduce cooldown
+            this.cooldown--;
+    
+    
+            //make turret shoot
+            if (this.cooldown <= 0) //after cooldown time has passed
+                {
+                    //fire a projectile
+                    let proj = this.projectiles.get();
+                    if (proj) 
+                        {
+                            proj.fire(this.x, this.y, this.target);
+
+                            //reset cooldown to another random number
+                            this.cooldown = 200;
+                        }
+                }
+            }
+
+
     }
 }

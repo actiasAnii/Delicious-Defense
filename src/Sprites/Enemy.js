@@ -12,21 +12,21 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 this.SPEED = Phaser.Math.Between (700, 750);
                 this.animation = "oppyWalk";
                 this.scorePoints;
-                this.health;
+                this.MAXHEALTH = 5;
                 break;
 
             case 1: //spirit
                 this.SPEED = Phaser.Math.Between (300, 350);
                 this.animation = "spiritFlap";
                 this.scorePoints;
-                this.health;
+                this.MAXHEALTH = 2;
                 break;
             
             case 2: //
                 this.SPEED = Phaser.Math.Between (500, 600);
                 this.animation = "sojWalk";
                 this.scorePoints;
-                this.health;
+                this.MAXHEALTH = 3;
                 break;
 
         }
@@ -37,6 +37,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         this.TILESIZE = 16;
         this.ORGINX = x;
         this.ORGINY = y;
+        this.health = this.MAXHEALTH;
 
 
         //add sprite to scene
@@ -106,15 +107,46 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
             targets: this,
             tweens: tweens,
             onComplete: () => {
-                this.destroy();
+                this.makeInactive();
             }
 
         });
     }
 
+    makeActive()
+    {
+        this.setActive(true);
+        this.setVisible(true);
+        this.y = this.ORGINY;
+        this.x = this.ORGINX;
+        this.health = this.MAXHEALTH;
+        //potentially find path again
+        this.moveEnemy;
+
+    }
+
+    makeInactive()
+    {
+        this.scene.tweens.killTweensOf(this);
+        this.setActive(false);
+        this.setVisible(false);
+        this.y = -1000;
+
+    }
+
+    takeDamage()
+    {
+        this.health--;
+        console.log(this.health);
+        if (this.health <= 0)
+            {
+                this.makeInactive();
+
+            }
+    }
+
     update()
     {
-        //update health here 
 
     }
 

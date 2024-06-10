@@ -34,9 +34,6 @@ class Level extends Phaser.Scene {
         this.groundLayer = this.map.createLayer("Ground-n-Paths", [this.town_tileset, this.battle_tileset], 0, 0);
         this.decorationLayer = this.map.createLayer("Decoration", [this.town_tileset, this.battle_tileset], 0, 0);
 
-        console.log('Ground Layer:', this.groundLayer);
-        console.log('Decoration Layer:', this.decorationLayer);
-
         //give path layers a certain property for enemy pathing
         let defenseGrid = this.layersToGrid([this.groundLayer, this.decorationLayer]);
         console.log(defenseGrid);
@@ -47,6 +44,7 @@ class Level extends Phaser.Scene {
         this.finder.setGrid(defenseGrid);
 
         let walkables = [25];
+        this.placeableTiles = this.getPlaceables();
 
         // Tell EasyStar which tiles can be walked on
         this.finder.setAcceptableTiles(walkables);
@@ -57,7 +55,7 @@ class Level extends Phaser.Scene {
             row.forEach((tile, x) => {
             if (walkables.includes(tile)) {
             // Assuming you have a method to highlight a tile, e.g., `highlightTile(x, y)`
-            //this.highlightTile(x, y); // Implement this method to visually highlight the tile
+
             }
         });
         });
@@ -86,20 +84,108 @@ class Level extends Phaser.Scene {
         this.physics.add.overlap(my.sprite.turret.projectiles, my.enemies, (enemy, projectile) => { //why are u like this phaser i hate you
             console.log("collision detected");
             projectile.y = 5000;
-            //enemy.destroy();
+            enemy.takeDamage();
         });
+
+        this.placingMode = false;
+        this.highlights = [];
+
+        //
+        this.input.keyboard.on('keydown-P', () => {
+            this.togglePlacingMode();
+        }, this);
 
     }
 
 
     //helper functions
 
-    //debug function to highlight walkable tiles
-    highlightTile(x, y) {
+    //debug function to highlight specified tiles
+    highlightTile(x, y)
+    {
         // Create a simple rectangle or any visual indicator on the map
-        let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0x00ff00, 0.5);
+        let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0xacffca, 0.5);
         rect.setOrigin(0);
+        this.highlights.push(rect);
+    }
+
+    notThisTile(x, y)
+    {
+        let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0xea9999, 0.5);
+        rect.setOrigin(0);
+        this.highlights.push(rect);
+
+    }
+
+    //alternate grid that holds spaces where turrets can be placed
+    getPlaceables()
+    {
+        let placeableTiles = [];
+
+        for (let y = 0; y < this.map.height; y++) {
+            placeableTiles[y] = [];
+            for (let x = 0; x < this.map.width; x++) {
+                const tile = this.map.getTileAt(x, y, true, 'Ground-n-Paths');
+                const overlap = this.map.getTileAt(x, y, 'Decoration');
+                if (tile.properties.tp && !overlap.properties.here)
+                {
+                    placeableTiles[y][x] = true;
+                    //this.highlightTile(x, y);
+                }
+                else
+                {
+                    placeableTiles[y][x] = false;
+                    //this.subtractTile(x, y);
+
+                }
+            }
         }
+        return placeableTiles;
+
+    }
+
+    togglePlacingMode()
+    {
+        console.log("attempting to toggle placing mode")
+        if (this.placingMode == true)
+        {
+            this.disablePlacingMode();
+        }
+        else 
+        {
+            this.enablePlacingMode();
+
+        }
+
+    }
+    
+    //turn on grid and highlights. maybe also change ui to show relevant information
+    enablePlacingMode()
+    {
+        console.log("enabling pm");
+        this.placingMode = true;
+        for (let y = 0; y < this.placeableTiles.length; y++) {
+            for (let x = 0; x < this.placeableTiles[y].length; x++) {
+                if (this.placeableTiles[y][x]) {
+                    this.highlightTile(x, y);
+                } else {
+                    this.notThisTile(x, y);
+                }
+            }
+        }
+
+    }
+
+    //turn off grid and highlights
+    disablePlacingMode()
+    {
+        console.log("disabling pm");
+        this.placingMode = false;
+        this.highlights.forEach(highlight => highlight.destroy());
+        this.highlights = [];
+
+    }
+    
 
     // layersToGrid
     //
