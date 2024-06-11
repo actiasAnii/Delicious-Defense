@@ -27,11 +27,11 @@
             "scaleInEditor": 1
         },
         "Level.tmx": {
-            "scale": 1,
+            "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 380,
-                "y": 124
+                "x": 556.6666666666666,
+                "y": 249.33333333333337
             }
         },
         "Level.tmx#tilemap-battle_packed": {

@@ -13,6 +13,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         this.scene = scene;
         this.target = null; //current target enemy
         this.cooldown = 10;
+        this.upgradeLvl = 0;
         //these will be set in a switch
 
         switch (type)
@@ -113,6 +114,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         {
             this.setTexture(this.HIGHLIGHT_TEXTURE).setScale(0.8); //make a swap texture function for when theres variation
             this.anims.pause();
+            this.levelPopUp(this.x + 5, this.y - 15);
         }
 
     }
@@ -121,15 +123,58 @@ class Turret extends Phaser.Physics.Arcade.Sprite
     {
         this.anims.play(this.ANIMATION, true); //make an animations play function for when theres variation
         this.setTexture("platformer_characters", this.TEXTURE).setScale(0.7);
+        this.scene.tweens.add({
+            targets: this.LVLPopUpContainer,
+            alpha: 0,
+            duration: 250,
+            ease: 'Sine.In',
+            onComplete: function() {
+                if (this.LVLPopUpContainer) {
+                    this.LVLPopUpContainer.destroy();
+                }
+            },
+            onCompleteScope: this.scene
+        });
 
+    }
+
+    levelPopUp(x, y)
+    {
+        this.LVLPopUpContainer = this.scene.add.container(0,0);
+        //graphics object for the background
+        this.LVLPopUpBackground = this.scene.add.graphics();
+        this.LVLPopUpBackground.lineStyle(1, 0xffffff, 1);
+        this.LVLPopUpBackground.fillStyle(0xfab49b, 0.9);
+        this.LVLPopUpBackground.fillRoundedRect(0, 0, this.scene.tiletoWorld(1.6), this.scene.tiletoWorld(1), 2);
+        this.LVLPopUpBackground.strokeRoundedRect(0, 0, this.scene.tiletoWorld(1.6), this.scene.tiletoWorld(1), 2);
+        this.LVLPopUpContainer.add(this.LVLPopUpBackground);
+
+        //text
+        this.currLevel = this.scene.add.bitmapText(this.scene.tiletoWorld(0.85), this.scene.tiletoWorld(0.6), "thick", "LVL:"+ this.upgradeLvl).setOrigin(0.5).setScale(0.5);
+        this.LVLPopUpContainer.add(this.currLevel);
+
+        //set position and depth
+        this.LVLPopUpContainer.setPosition(x, y).setDepth(10000);
+        //initially hide the pop-up
+        this.LVLPopUpContainer.setVisible(true);
+        
     }
 
 
     upgrade()
-    {
+    { 
+        //add a check to see if its reached max upgrade level
         if (this.scene.turretSelected == 4 && this.scene.placingMode == true)
         {
-            console.log("turret upgraded");
+            this.upgradeLvl++;
+            if (this.upgradeLvl <= 3)
+            {
+                console.log("turret upgraded"); //temp, change stats
+            }
+            else
+            {
+                this.scene.maxUpgradeLevelPopUp(this.x + 10, this.y - 20)
+            }
         }
         
     }
