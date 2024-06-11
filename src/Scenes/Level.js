@@ -36,7 +36,6 @@ class Level extends Phaser.Scene {
 
         //give path layers a certain property for enemy pathing
         let defenseGrid = this.layersToGrid([this.groundLayer, this.decorationLayer]);
-        console.log(defenseGrid);
 
         //create finder for pathfinding
         this.finder = new EasyStar.js();
@@ -45,9 +44,6 @@ class Level extends Phaser.Scene {
 
         let walkables = [25];
         this.placeableTiles = this.getPlaceables();
-        console.log(this.placeableTiles);
-        console.log(game.config.height);
-        console.log(game.config.width);
 
         // Tell EasyStar which tiles can be walked on
         this.finder.setAcceptableTiles(walkables);
@@ -105,6 +101,8 @@ class Level extends Phaser.Scene {
         my.text.placementInstructions = this.add.bitmapText(this.tiletoWorld(28), this.tiletoWorld(25.5), "thick", "click a green tile to place a new turret or click an existing turret with 4 selected to upgrade!!").
         setOrigin(0.5).setScale(0.8).setDepth(1000);
         my.text.placementInstructions.setVisible(false);
+
+        //invalid placement and not enough resources pop ups
 
         //placing mode modes
         this.input.keyboard.on('keydown-ONE', () => {
@@ -234,9 +232,6 @@ class Level extends Phaser.Scene {
 
     //create a new turret
     placeTurret(pointer) {
-        console.log("attempting to place turret");
-        console.log(pointer.x);
-        console.log(pointer.y);
         let conversion = this.TILESIZE * this.SCALE;
         let i = Math.floor(pointer.y / conversion);
         let j = Math.floor(pointer.x / conversion);
@@ -247,7 +242,7 @@ class Level extends Phaser.Scene {
         if (this.placeableTiles[i][j] && this.placingMode == true && this.turretSelected != 4) 
         {
             console.log("placing turret of type: " + this.turretSelected);
-            let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, 200);
+            let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, this.turretSelected);
             my.turrets.add(turret);
 
             //make upgradeable
@@ -256,31 +251,26 @@ class Level extends Phaser.Scene {
 
             // Add event listener for pointer over (hover) events
             turret.on('pointerover', function(pointer) {
-                turret.setTexture("hl_chara").setScale(0.8); //make a swap texture function for when theres variation
-                turret.anims.pause();
+                turret.highlightTurret();
                 console.log("hovering");
             });
 
-            // Add event listener for pointer out events
+            //event listener for pointer out events
             turret.on('pointerout', function(pointer) {
-                this.clearTint(); //swap texture back
-                turret.anims.play("turrChara", true); //make an animations play function for when theres variation
-                turret.setScale(0.7);
+                turret.normalizeTurret();
                 console.log("no longer hovering");
             });
 
-            // Add event listener for pointer down (click) events
+            //event listener for pointer down (click) events
             turret.on('pointerdown', function(pointer) {
                 console.log('Turret clicked!');
-                if(this.turretSelected == 4)
-                    {turret.upgrade();}
+                turret.upgrade();
             });
 
             //handle collision between this turret and an enemy
             this.physics.add.overlap(turret.projectiles, my.enemies, (enemy, projectile) => { //why are u like this phaser i hate you
-                console.log("collision detected");
                 projectile.y = 5000;
-                enemy.takeDamage();
+                enemy.takeDamage(projectile);
             });
     
             //mark the tile as non-placeable
@@ -355,8 +345,7 @@ class Level extends Phaser.Scene {
     setMode(mode)
     {
         this.turretSelected = mode;
-        console.log(this.turretSelected);
-        this.currentText.setText(" current selection: " + this.turretSelected);
+        this.currentText.setText("current selection: " + this.turretSelected);
 
     }
 

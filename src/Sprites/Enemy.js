@@ -22,7 +22,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 this.MAXHEALTH = 2;
                 break;
             
-            case 2: //
+            case 2: //sojourner
                 this.SPEED = Phaser.Math.Between (500, 600);
                 this.animation = "sojWalk";
                 this.scorePoints;
@@ -70,7 +70,6 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
             if (path === null) {
                 console.warn("Path was not found.");
             } else {
-                console.log(path);
     
                 // Convert path back to pixel coordinates
                 let pixelPath = path.map(step => ({
@@ -134,10 +133,10 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
 
     }
 
-    takeDamage()
+    takeDamage(projectile)
     {
-        this.health--;
-        console.log(this.health);
+        this.health -= projectile.DAMAGE;
+        console.log("enemy health: " + this.health);
         if (this.health <= 0)
             {
                 this.makeInactive();

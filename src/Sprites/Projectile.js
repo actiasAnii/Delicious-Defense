@@ -2,12 +2,13 @@ class Projectile extends Phaser.Physics.Arcade.Sprite
 {
     constructor(scene, x, y)
     {
-        super(scene, x, y, "heart");
+        super(scene, x, y, "p_burger");
 
         //set initial vars
-        //might pass in a couple
-        this.SPEED = 250;
+        this.SPEED = 260;
         this.scene = scene;
+        this.DAMAGE = 1;
+        this.setScale(0.6)
 
         //handle going offscreen
         this.scene.physics.add.existing(this);

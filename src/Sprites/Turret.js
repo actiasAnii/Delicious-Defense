@@ -1,6 +1,6 @@
 class Turret extends Phaser.Physics.Arcade.Sprite
 {
-    constructor(scene, x, y, range)
+    constructor(scene, x, y, type)
     {
         super(scene, x, y, "platformer_characters", "tile_0000.png");
 
@@ -12,11 +12,43 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         //set initial vars
         this.scene = scene;
         this.target = null; //current target enemy
+        this.cooldown = 10;
         //these will be set in a switch
-        this.RANGE = range; //detection range for enemies
-        this.cooldown = 10; //for firing delay
-        this.DAMAGE = 1;
-        this.PROJ_TEXTURE = "p_burger";
+
+        switch (type)
+        {
+            case 1: //chara
+                this.RANGE = 150;
+                this.COOLDOWN = 200;
+                this.DAMAGE = 1;
+                this.PROJ_TEXTURE = "p_burger";
+                this.HIGHLIGHT_TEXTURE = "hl_chara";
+                this.TEXTURE = "tile_0000.png";
+                this.ANIMATION = "turrChara"
+                break;
+            
+            case 2: //enif
+                this.RANGE = 250;
+                this.COOLDOWN = 150;
+                this.DAMAGE = 1;
+                this.PROJ_TEXTURE = "p_musubi";
+                this.HIGHLIGHT_TEXTURE = "hl_enif";
+                this.TEXTURE = "tile_0004.png";
+                this.ANIMATION = "turrEnif"
+                break;
+
+            case 3: //rigel
+                this.RANGE = 100;
+                this.COOLDOWN = 250;
+                this.DAMAGE = 2;
+                this.PROJ_TEXTURE = "p_sushi";
+                this.HIGHLIGHT_TEXTURE = "hl_rigel";
+                this.TEXTURE = "tile_0002.png";
+                this.ANIMATION = "turrRigel"
+                break;
+
+        }
+
 
         //debug enable physics body for the turret
         this.body.setImmovable(true);
@@ -26,11 +58,12 @@ class Turret extends Phaser.Physics.Arcade.Sprite
             classType: Projectile, 
             runChildUpdate: true, 
             createCallback: (proj) => {
-                proj.setTexture(this.PROJ_TEXTURE).setScale(0.5);
+                proj.setTexture(this.PROJ_TEXTURE);
+                proj.DAMAGE = this.DAMAGE;
             }
         });
 
-        this.anims.play("turrChara", true);
+        this.anims.play(this.ANIMATION, true);
 
         console.log(this.x, this.y);
     }
@@ -74,9 +107,31 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         this.setRotation(angle);
     }
 
+    highlightTurret()
+    {
+        if (this.scene.placingMode == true)
+        {
+            this.setTexture(this.HIGHLIGHT_TEXTURE).setScale(0.8); //make a swap texture function for when theres variation
+            this.anims.pause();
+        }
+
+    }
+
+    normalizeTurret()
+    {
+        this.anims.play(this.ANIMATION, true); //make an animations play function for when theres variation
+        this.setTexture("platformer_characters", this.TEXTURE).setScale(0.7);
+
+    }
+
+
     upgrade()
     {
-        console.log("turret upgraded");
+        if (this.scene.turretSelected == 4 && this.scene.placingMode == true)
+        {
+            console.log("turret upgraded");
+        }
+        
     }
 
    
@@ -86,10 +141,10 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         this.findTarget();
         this.rotateTurret();
 
-        if (this.target) {
+        //reduce cooldown
+        this.cooldown--;
 
-            //reduce cooldown
-            this.cooldown--;
+        if (this.target) {
     
     
             //make turret shoot
@@ -102,7 +157,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
                             proj.fire(this.x, this.y, this.target);
 
                             //reset cooldown to another random number
-                            this.cooldown = 200;
+                            this.cooldown = this.COOLDOWN;
                         }
                 }
             }
