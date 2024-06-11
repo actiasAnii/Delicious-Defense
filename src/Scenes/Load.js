@@ -46,12 +46,17 @@ class Load extends Phaser.Scene {
         //health bar
         this.load.image("heart_full", "health_full.png");
         this.load.image("heart_empty", "health_empty.png");
+        //resource tracker
+        this.load.image("coin_1", "coin_1.png");
+        this.load.image("coin_2", "coin_2.png");
         //highlighted turrets
         this.load.image("hl_chara", "hl_c2.png");
         this.load.image("hl_enif", "hl_e2.png");
         this.load.image("hl_rigel", "hl_r2.png");
         //misc
-        this.load.image("sparkle", "explosion_1.png");
+        this.load.image("sparkle1", "explosion_1.png");
+        this.load.image("sparkle2", "explosion_2.png");
+        this.load.image("sparkle3", "explosion_2.png");
 
         //load font
         this.load.bitmapFont("thick", "thick_8x8.png", "thick_8x8.xml");
@@ -165,6 +170,32 @@ class Load extends Phaser.Scene {
             frameRate: 3,
             repeat: -1
         });
+
+        ///////misc minor animations
+        this.anims.create({
+            key: 'coinFlip',
+            frames:[
+                { key: 'coin_1' },
+                { key: 'coin_2' }
+            ],
+            frameRate: 2.5,
+            repeat: -1
+
+        });
+
+        this.anims.create({
+            key: 'perish',
+            frames: [
+                { key: 'sparkle1' },
+                { key: 'sparkle2' },
+                { key: 'sparkle3' }
+
+            ],
+            frameRate: 16,
+            repeat: 3,
+            hideOnComplete: true
+        });
+
         
 
         ///////pass to next scene

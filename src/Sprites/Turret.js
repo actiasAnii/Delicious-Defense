@@ -19,7 +19,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         {
             case 1: //chara
                 this.RANGE = 150;
-                this.COOLDOWN = 200;
+                this.COOLDOWN = 150;
                 this.DAMAGE = 1;
                 this.PROJ_TEXTURE = "p_burger";
                 this.HIGHLIGHT_TEXTURE = "hl_chara";
@@ -29,7 +29,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
             
             case 2: //enif
                 this.RANGE = 250;
-                this.COOLDOWN = 150;
+                this.COOLDOWN = 80;
                 this.DAMAGE = 1;
                 this.PROJ_TEXTURE = "p_musubi";
                 this.HIGHLIGHT_TEXTURE = "hl_enif";
@@ -39,7 +39,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
 
             case 3: //rigel
                 this.RANGE = 100;
-                this.COOLDOWN = 250;
+                this.COOLDOWN = 200;
                 this.DAMAGE = 2;
                 this.PROJ_TEXTURE = "p_sushi";
                 this.HIGHLIGHT_TEXTURE = "hl_rigel";

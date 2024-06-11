@@ -12,6 +12,10 @@ class Level extends Phaser.Scene {
         this.GOALX = this.tiletoWorld(54);
         this.GOALY = this.tiletoWorld(18.5);
 
+        my.sprite.fullHearts = [];
+        my.sprite.emptyHearts = [];
+        this.costs = [0, 60, 80, 70, 50]; //use to set costs and check if points are sufficient
+
     }
 
     preload()
@@ -28,11 +32,10 @@ class Level extends Phaser.Scene {
         //first parameter: name we gave the tileset in Tiled
         //second parameter: key for the tilesheet
         this.town_tileset = this.map.addTilesetImage("tilemap-town_packed", "town_tiles");
-        this.battle_tileset = this.map.addTilesetImage("tilemap-battle_packed", "battle_tiles");
 
         //create layers
-        this.groundLayer = this.map.createLayer("Ground-n-Paths", [this.town_tileset, this.battle_tileset], 0, 0);
-        this.decorationLayer = this.map.createLayer("Decoration", [this.town_tileset, this.battle_tileset], 0, 0);
+        this.groundLayer = this.map.createLayer("Ground-n-Paths", [this.town_tileset], 0, 0);
+        this.decorationLayer = this.map.createLayer("Decoration", [this.town_tileset], 0, 0);
 
         //give path layers a certain property for enemy pathing
         let defenseGrid = this.layersToGrid([this.groundLayer, this.decorationLayer]);
@@ -48,21 +51,9 @@ class Level extends Phaser.Scene {
         // Tell EasyStar which tiles can be walked on
         this.finder.setAcceptableTiles(walkables);
 
-        //debug
-        // Loop through the grid to highlight walkable tiles
-        defenseGrid.forEach((row, y) => {
-            row.forEach((tile, x) => {
-            if (walkables.includes(tile)) {
-            // Assuming you have a method to highlight a tile, e.g., `highlightTile(x, y)`
-
-            }
-        });
-        });
-
         ////create camera
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.setZoom(this.SCALE);
-
 
         //create donut goal
         my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0.5).setScale(1.5);
@@ -84,7 +75,45 @@ class Level extends Phaser.Scene {
 
         my.enemies.add(my.sprite.enemyFirst);
 
-        ////placing mode elements
+        ///////UI
+        this.points = 200;
+        this.pointsCollect = 1500;
+        my.text.resourceTracker = this.add.bitmapText(this.tiletoWorld(4.75), this.tiletoWorld(0.4), "thick", ":" + ("00000" + this.points)
+        .slice(-5)).setDepth(100000).setScale(1.2);
+        my.sprite.coin = this.add.sprite(this.tiletoWorld(4), 10.5, "coin_1").setDepth(100000);
+        my.sprite.coin.anims.play("coinFlip");
+
+        //instructions for entering place mode
+        my.text.pmEnterInstructions = this.add.bitmapText(this.tiletoWorld(28), this.tiletoWorld(25.5), "thick", "press P to enter placement mode!!").
+        setOrigin(0.5).setScale(0.8).setDepth(1000);
+        my.text.pmEnterInstructions.setVisible(true);
+
+        //current wave
+        my.text.currentWaveDisplay = this.add.bitmapText(this.tiletoWorld(29.1), this.tiletoWorld(0.8), "thick", "WAVE:1").
+        setOrigin(0.5).setScale(1.2).setDepth(1000);
+
+
+
+        //create health bar
+        for (let i = 0; i < 4; i++) {
+            //new sprite for both empty and full arrays
+            let fullHeart = this.add.sprite(0, 20, 'heart_full').setOrigin(0).setScale(0.9);
+            let emptyHeart = this.add.sprite(0, 20, 'heart_empty').setOrigin(0).setScale(0.9);
+
+            fullHeart.visible = true; //start with full hearts visible
+            emptyHeart.visible = false;
+
+            //push sprites to corresponding arrays
+            my.sprite.fullHearts.push(fullHeart);
+            my.sprite.emptyHearts.push(emptyHeart);
+
+            //position the hearts horizontally
+            const offsetX = i * (fullHeart.displayWidth + 1) + 62; //setting x val here
+            fullHeart.x = offsetX;
+            emptyHeart.x = offsetX;
+        }
+
+        ////////placing mode UI
         this.placingMode = false;
         this.highlights = [];
         this.gridGraphics; 
@@ -309,6 +338,8 @@ class Level extends Phaser.Scene {
 
         my.text.placementInstructions.setVisible(true);
 
+        my.text.pmEnterInstructions.setVisible(false);
+
         this.popUpContainer.setVisible(true);
 
         this.placingMode = true;
@@ -334,6 +365,7 @@ class Level extends Phaser.Scene {
         this.gridGraphics.clear();
         this.popUpContainer.setVisible(false);
         my.text.placementInstructions.setVisible(false);
+        my.text.pmEnterInstructions.setVisible(true);
 
     }
 
@@ -347,6 +379,11 @@ class Level extends Phaser.Scene {
         this.turretSelected = mode;
         this.currentText.setText("current selection: " + this.turretSelected);
 
+    }
+
+    updateResourceDisplay()
+    {
+        my.text.resourceTracker.setText(":" + ("00000" + this.points).slice(-5));
     }
 
 
@@ -384,7 +421,7 @@ class Level extends Phaser.Scene {
         this.popUpContainer.add(this.rigelDesc); this.popUpContainer.add(this.rigelTitle); this.popUpContainer.add(this.rigelKey);
 
         //orr
-        this.upgradeKey = this.add.sprite(this.tiletoWorld(1.5), this.tiletoWorld(9.75), "sparkle").setScale(0.85);
+        this.upgradeKey = this.add.sprite(this.tiletoWorld(1.5), this.tiletoWorld(9.75), "sparkle1").setScale(0.85);
         this.upgradeTitle = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(9.25), "thick", "4 - UPGRADE").setOrigin(0).setScale(0.7);
         this.upgradeText = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(9.75), "thick", "spend 50\nupgrade existing turret").setOrigin(0).setScale(0.6);
         this.popUpContainer.add(this.upgradeText); this.popUpContainer.add(this.upgradeTitle); this.popUpContainer.add(this.upgradeKey);
@@ -406,6 +443,14 @@ class Level extends Phaser.Scene {
 
     update()
     {
+        this.pointsCollect --;
+
+        if (this.pointsCollect <= 0)
+        {
+            this.pointsCollect = 1500;
+            this.points += 5;
+            this.updateResourceDisplay();
+        }
 
     }
 

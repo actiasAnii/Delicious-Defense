@@ -8,6 +8,9 @@
         "."
     ],
     "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
         "Level.tmj": {
             "scale": 1.5,
             "selectedLayer": 0,
