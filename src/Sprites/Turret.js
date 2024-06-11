@@ -74,6 +74,11 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         this.setRotation(angle);
     }
 
+    upgrade()
+    {
+        console.log("turret upgraded");
+    }
+
    
     update() {
 

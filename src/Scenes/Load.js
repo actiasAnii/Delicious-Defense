@@ -36,12 +36,17 @@ class Load extends Phaser.Scene {
         //load particles
         this.load.multiatlas("kenny-particles", "kenny-particles.json"); //multiatlas ripped from improved platformer
 
-        //load additional assets
+        //////load additional assets
         this.load.image("donut", "donut_classic.png");
+        //projectiles
         this.load.image("p_burger", "projectile_burger.png");
-
+        //health bar
         this.load.image("heart", "health_full.png");
-
+        //highlighted turrets
+        this.load.image("hl_chara", "hl_c2.png");
+        this.load.image("hl_enif", "hl_e2.png");
+        this.load.image("hl_rigel", "hl_r2.png");
+        //misc
         this.load.image("sparkle", "explosion_1.png");
 
         //load font
@@ -139,7 +144,7 @@ class Load extends Phaser.Scene {
                 suffix: ".png",
                 zeroPad: 4
             }),
-            frameRate: 1,
+            frameRate: 3,
             repeat: -1
         });
         
