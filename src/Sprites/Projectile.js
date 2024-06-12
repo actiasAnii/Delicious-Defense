@@ -20,14 +20,12 @@ class Projectile extends Phaser.Physics.Arcade.Sprite
 
     disableProj()
     {
-        console.log("disabled");
         this.setActive(false);
         this.setVisible(false); 
     }
 
     //handle firing bullets
     fire(x, y, target) {
-        console.log("firing!");
         this.setActive(true);
         this.setVisible(true);
         this.setPosition(x, y);

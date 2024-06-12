@@ -36,7 +36,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 break;
             
             case 3: //curiosity
-                this.SPEED = Phaser.Math.Between (500, 550);
+                this.SPEED = Phaser.Math.Between (400, 550);
                 this.setTexture("platformer_characters", "tile_0018.png");
                 this.setScale(0.7).setOrigin(0,0);
                 this.ANIMATION = "curiWalk";
@@ -56,7 +56,6 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         }
 
         //set initial vars
-        this.SCENE = scene;
         this.finder = finder;
         this.TILESIZE = 16;
         this.ORGINX = x;
@@ -133,6 +132,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
             tweens: tweens,
             onComplete: () => {
                 this.makeInactive();
+                this.scene.updateHealth();
             }
 
         });

@@ -19,8 +19,8 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         switch (type)
         {
             case 1: //chara
-                this.RANGE = 150;
-                this.COOLDOWN = 150;
+                this.RANGE = 120;
+                this.COOLDOWN = 120;
                 this.DAMAGE = 1;
                 this.PROJ_TEXTURE = "p_burger";
                 this.HIGHLIGHT_TEXTURE = "hl_chara";
@@ -29,7 +29,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
                 break;
             
             case 2: //enif
-                this.RANGE = 250;
+                this.RANGE = 200;
                 this.COOLDOWN = 80;
                 this.DAMAGE = 1;
                 this.PROJ_TEXTURE = "p_musubi";
@@ -39,8 +39,8 @@ class Turret extends Phaser.Physics.Arcade.Sprite
                 break;
 
             case 3: //rigel
-                this.RANGE = 100;
-                this.COOLDOWN = 200;
+                this.RANGE = 60;
+                this.COOLDOWN = 140;
                 this.DAMAGE = 2;
                 this.PROJ_TEXTURE = "p_sushi";
                 this.HIGHLIGHT_TEXTURE = "hl_rigel";
@@ -69,41 +69,25 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         console.log(this.x, this.y);
     }
 
-       //find the closest enemy within range
-       /*findTarget() {
-        let enemies = my.enemies.getChildren();
+    findTarget() {
         let closestEnemy = null;
         let closestDistance = this.RANGE;
-
-        enemies.forEach(enemy => {
+        
+        //iterate through each enemy group
+        let enemyGroups = [my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances];
+        
+        enemyGroups.forEach(group => {
+        group.getChildren().forEach(enemy => {
             let distance = Phaser.Math.Distance.Between(this.x, this.y, enemy.x, enemy.y);
             if (distance < closestDistance) {
                 closestEnemy = enemy;
                 closestDistance = distance;
             }
         });
-
-        this.target = closestEnemy;
-    }*/
-        findTarget() {
-            let closestEnemy = null;
-            let closestDistance = this.RANGE;
+        });
         
-            //iterate through each enemy group
-            let enemyGroups = [my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances];
-        
-            enemyGroups.forEach(group => {
-                group.getChildren().forEach(enemy => {
-                    let distance = Phaser.Math.Distance.Between(this.x, this.y, enemy.x, enemy.y);
-                    if (distance < closestDistance) {
-                        closestEnemy = enemy;
-                        closestDistance = distance;
-                    }
-                });
-            });
-        
-            this.target = closestEnemy;
-        }
+         this.target = closestEnemy;
+    }
 
     //rotate the turret to face the target enemy
     rotateTurret() {
@@ -188,7 +172,11 @@ class Turret extends Phaser.Physics.Arcade.Sprite
             this.upgradeLvl++;
             if (this.upgradeLvl <= 3)
             {
-                console.log("turret upgraded"); //temp, change stats
+                this.DAMAGE++;
+                this.RANGE += 30;
+                this.COOLDOWN -= 15;
+
+                console.log("damage, range, speed: " + this.DAMAGE + " " + this.RANGE + " " + this.COOLDOWN)
 
                 //subtract cost from player's points
                 this.scene.points = this.scene.points - 50;

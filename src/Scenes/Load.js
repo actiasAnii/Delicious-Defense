@@ -15,17 +15,12 @@ class Load extends Phaser.Scene {
 
         //load tilemap information
         this.load.image("town_tiles", "tilemap-town_packed.png");
-        this.load.image("battle_tiles", "tilemap-battle_packed.png");
         //unsure if i have to load character sheet as well
         this.load.tilemapTiledJSON("level", "Level.tmj");//level tilemap in JSON
+        this.load.tilemapTiledJSON("endScreen", "EndScreen.tmj"); //end screen template tilemap in JSON
         //load tilemaps for win and lose screens once created
 
         //load map tilemaps as spritesheets
-        this.load.spritesheet("battle_sheet", "tilemap-battle_packed.png", {
-            //px width/height
-            frameWidth: 16,
-            frameHeight: 16
-        });
 
         this.load.spritesheet("town_sheet", "tilemap-town_packed.png", {
             //px width/height
@@ -109,7 +104,7 @@ class Load extends Phaser.Scene {
                 suffix: ".png",
                 zeroPad: 4
             }),
-            frameRate: 4,
+            frameRate: 4.5,
             repeat: -1
         });
 

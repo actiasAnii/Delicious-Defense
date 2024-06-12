@@ -52,7 +52,7 @@ let config = {
     scene: [Load, Level, WinScreen, LoseScreen] //rest of gameplay scenes
 }
 
-const SCALE = 2.0;
+const SCALE = 2.1;
 var my = {sprite: {}, text: {}, vfx: {}};
 
 const game = new Phaser.Game(config);

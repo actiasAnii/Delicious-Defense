@@ -7,9 +7,8 @@ class Level extends Phaser.Scene {
 
     init()
     {
-        this.SCALE = 2.1;
         this.TILESIZE = 16;
-        this.GOALX = this.tiletoWorld(54);
+        this.GOALX = this.tiletoWorld(53.5);
         this.GOALY = this.tiletoWorld(18.5);
 
         my.sprite.fullHearts = [];
@@ -50,7 +49,7 @@ class Level extends Phaser.Scene {
     create()
     {
         /////////set up map
-        this.map = this.add.tilemap("level", 16, 16, 48, 25);
+        this.map = this.add.tilemap("level", 16, 16, 55, 26);
 
         //add tilesets to map
         //first parameter: name we gave the tileset in Tiled
@@ -77,12 +76,12 @@ class Level extends Phaser.Scene {
 
         ////create camera
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        this.cameras.main.setZoom(this.SCALE);
+        this.cameras.main.setZoom(SCALE);
 
         //create donut goal
-        my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0.5).setScale(1.5);
+        my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0.5).setScale(1.5).setDepth(2);
         //cute lil player stand it by the donut. like commander of the troops
-        my.sprite.playerStandIn = this.add.sprite(this.tiletoWorld(54), this.tiletoWorld(20), "platformer_characters", "tile_0006.png").setScale(0.8);
+        my.sprite.playerStandIn = this.add.sprite(this.GOALX, this.tiletoWorld(20), "platformer_characters", "tile_0006.png").setScale(0.8);
         my.sprite.playerStandIn.anims.play("friskHop");
 
         //groups to hold enemies and turrets
@@ -93,11 +92,11 @@ class Level extends Phaser.Scene {
 
         my.enemies = this.add.group();
 
-        my.opportunities = this.createEnemies(0, 10);
-        my.spirits = this.createEnemies(1, 10);
-        my.sojourners = this.createEnemies(2, 10);
-        my.curiosities = this.createEnemies(3, 10);
         my.perseverances = this.createEnemies(4, 10);
+        my.opportunities = this.createEnemies(0, 10);
+        my.sojourners = this.createEnemies(2, 10);
+        my.spirits = this.createEnemies(1, 10);
+        my.curiosities = this.createEnemies(3, 10);
 
         my.enemies.addMultiple([my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances]);
 
@@ -110,8 +109,21 @@ class Level extends Phaser.Scene {
 
         //instructions for entering place mode
         my.text.pmEnterInstructions = this.add.bitmapText(this.tiletoWorld(28), this.tiletoWorld(25.5), "thick", "press P to enter placement mode!!").
-        setOrigin(0.5).setScale(0.8).setDepth(1000);
+        setOrigin(0.5).setScale(0.9).setDepth(1000);
         my.text.pmEnterInstructions.setVisible(true);
+
+        my.text.defendTheDonut = this.add.bitmapText(this.GOALX, this.GOALY - 18, "thick", "DEFEND").
+        setOrigin(0.5).setScale(0.7).setDepth(1000);
+
+        //cute defend bob up and down animation
+        this.tweens.add({
+            targets: my.text.defendTheDonut,
+            y: this.GOALY - 20, // target y position
+            duration: 700,     // duration of the tween in milliseconds
+            ease: 'Sine.easeInOut',
+            yoyo: true,         // makes the tween reverse on complete
+            repeat: -1          // repeat indefinitely
+        });
 
         //current wave
         my.text.currentWaveDisplay = this.add.bitmapText(this.tiletoWorld(29.1), this.tiletoWorld(0.8), "thick", "WAVE:" + this.currWave).
@@ -176,6 +188,16 @@ class Level extends Phaser.Scene {
         }, this);
         this.physics.world.drawDebug = false;
 
+        //debug scene switch
+        this.input.keyboard.on('keydown-W', () => {
+            this.scene.start("endWin")
+        }, this);
+
+        this.input.keyboard.on('keydown-L', () => {
+            this.scene.start("endLose")
+        }, this);
+
+
     }
 
 
@@ -186,14 +208,14 @@ class Level extends Phaser.Scene {
     {
         //create colored rectangle on the map
         let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0xacffca, 0.5);
-        rect.setOrigin(0);
+        rect.setOrigin(0).setDepth(10);
         this.highlights.push(rect);
     }
 
     notThisTile(x, y)
     {
         let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0xea9999, 0.5);
-        rect.setOrigin(0);
+        rect.setOrigin(0).setDepth(10);
         this.highlights.push(rect);
 
     }
@@ -232,12 +254,12 @@ class Level extends Phaser.Scene {
         //vertical lines
         for (let x = 0; x <= this.map.widthInPixels; x += this.TILESIZE) 
         {
-            graphics.lineBetween(x, 0, x, this.map.heightInPixels);
+            graphics.lineBetween(x, 0, x, this.map.heightInPixels).setDepth(10);
         }
 
         //horizontal lines
         for (let y = 0; y <= this.map.heightInPixels; y += this.TILESIZE) {
-            graphics.lineBetween(0, y, this.map.widthInPixels, y);
+            graphics.lineBetween(0, y, this.map.widthInPixels, y).setDepth(10);
             
         }
 
@@ -293,11 +315,9 @@ class Level extends Phaser.Scene {
 
     //create a new turret
     placeTurret(pointer) {
-        let conversion = this.TILESIZE * this.SCALE;
+        let conversion = this.TILESIZE * SCALE;
         let i = Math.floor(pointer.y / conversion);
         let j = Math.floor(pointer.x / conversion);
-        console.log(i);
-        console.log(j);
     
         //check if the tile is placeable
         if (this.placeableTiles[i][j] && this.placingMode == true && this.turretSelected != 4) 
@@ -318,18 +338,15 @@ class Level extends Phaser.Scene {
             //event listener for pointer over (hover) events
             turret.on('pointerover', function(pointer) {
                 turret.highlightTurret();
-                console.log("hovering");
             });
 
             //event listener for pointer out events
             turret.on('pointerout', function(pointer) {
                 turret.normalizeTurret();
-                console.log("no longer hovering");
             });
 
             //event listener for pointer down (click) events
             turret.on('pointerdown', function(pointer) {
-                console.log('Turret clicked!');
                 turret.upgrade();
             });
 
@@ -356,7 +373,7 @@ class Level extends Phaser.Scene {
         }
         else 
         {
-            this.insufficientFundsPopUp(pointer.x /this.SCALE + 5, pointer.y /this.SCALE - 10);
+            this.insufficientFundsPopUp(pointer.x /SCALE + 5, pointer.y /SCALE - 10);
         }
         }   
     }
@@ -379,7 +396,6 @@ class Level extends Phaser.Scene {
     //turn on grid and highlights. maybe also change ui to show relevant information
     enablePlacingMode()
     {
-        console.log("enabling pm");
 
         this.gridGraphics = this.drawGrid();
 
@@ -405,7 +421,6 @@ class Level extends Phaser.Scene {
     //turn off grid and highlights
     disablePlacingMode()
     {
-        console.log("disabling pm");
         this.placingMode = false;
         this.highlights.forEach(highlight => highlight.destroy());
         this.highlights = [];
@@ -433,11 +448,21 @@ class Level extends Phaser.Scene {
         my.text.pointTracker.setText(":" + ("00000" + this.points).slice(-5));
     }
 
+    updateHealth()
+    {
+        this.health--;
+
+        //for each element in the health bar arrays
+        for (let i = 0; i < 4; i++) 
+        {
+            my.sprite.fullHearts[i].visible = i < this.health; //if i is less than current player health, full heart is visible
+            my.sprite.emptyHearts[i].visible = i >= this.health; //if i is greater than current player health, empty heart is visible
+        }
+    }
+
     updateWave()
     {
-        //console.log("prev wave: " + this.currWave)
         this.currWave++;
-        //console.log("new wave: " + this.currWave)
 
         if (this.currWave <= 4){ //only four waves in this game
             my.text.currentWaveDisplay.setText("WAVE:" + this.currWave); //update display
@@ -554,8 +579,6 @@ class Level extends Phaser.Scene {
 
     insufficientFundsPopUp(x, y)
     {
-        console.log("insufficient funds called!")
-        console.log("x and y passed: " + x +", " + y);
         this.IFPopUpContainer = this.add.container(0,0);
         //graphics object for the background
         this.IFPopUpBackground = this.add.graphics();
@@ -662,11 +685,13 @@ class Level extends Phaser.Scene {
     //game ends
     winGame()
     {
+        this.scene.start("endWin");
 
     }
 
     loseGame()
     {
+        this.scene.start("endLose");
 
     }
 
