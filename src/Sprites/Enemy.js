@@ -167,6 +167,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         console.log("enemy health: " + this.health);
         if (this.health <= 0)
             {
+                this.scene.sound.play("soundPerish", {volume: 0.05});
                 let enemyPerish = this.scene.add.sprite(this.x, this.y, "sparkle1").setScale(1).play("perish");
                 enemyPerish.on('animationcomplete-perish', () => {
                     enemyPerish.destroy(); //destroy the sprite when the animation completes

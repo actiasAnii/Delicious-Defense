@@ -16,9 +16,9 @@ class Level extends Phaser.Scene {
         this.health = 4;
 
 
-        this.costs = [0, 60, 80, 70, 50]; //use to set costs and check if points are sufficient
+        this.costs = [0, 75, 90, 100, 50]; //use to set costs and check if points are sufficient
 
-        this.points = 400;
+        this.points = 250;
         this.pointsCollect = 1500;
 
         this.placingMode = false;
@@ -30,10 +30,10 @@ class Level extends Phaser.Scene {
         this.currWave = 0;
         //format: [opportunities, spirits, sojourners, curiosities, perserverances]
         //currently very easy for the sake of testing
-        this.wave1 = [2, 0, 0, 1, 0];
+        this.wave1 = [1, 0, 0, 2, 0];
         this.wave2 = [0, 2, 0, 1, 0];
         this.wave3 = [0, 0, 0, 1, 2];
-        this.wave4 = [2, 2, 1, 2, 3];
+        this.wave4 = [1, 1, 1, 1, 1];
         this.waves = [this.wave1, this.wave2, this.wave3, this.wave4];
         this.waveActive = false;
 
@@ -328,6 +328,8 @@ class Level extends Phaser.Scene {
             this.points -= this.costs[this.turretSelected];
             this.updatePointDisplay();
 
+            this.sound.play("soundPlace", {volume: 0.1});
+
             let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, this.turretSelected);
             my.turrets.add(turret);
 
@@ -438,8 +440,13 @@ class Level extends Phaser.Scene {
 
     setMode(mode)
     {
-        this.turretSelected = mode;
-        this.currentText.setText("current selection: " + this.turretSelected);
+        if (this.turretSelected != mode && this.placingMode == true)
+        {
+            this.turretSelected = mode;
+            this.currentText.setText("current selection: " + this.turretSelected);
+            this.sound.play("soundSwitch", {volume: 0.6});
+            
+        }
 
     }
 
@@ -451,6 +458,7 @@ class Level extends Phaser.Scene {
     updateHealth()
     {
         this.health--;
+        this.sound.play("soundOuch", {volume: 0.08});
 
         //for each element in the health bar arrays
         for (let i = 0; i < 4; i++) 
@@ -465,8 +473,13 @@ class Level extends Phaser.Scene {
         this.currWave++;
 
         if (this.currWave <= 4){ //only four waves in this game
-            my.text.currentWaveDisplay.setText("WAVE:" + this.currWave); //update display
+            //this.sound.play("soundWave", {volume: 0.1});
+            this.waveActive = true;
 
+            this.time.delayedCall(1000, () => {
+                this.sound.play('soundWave', {volume: 0.1});
+                my.text.currentWaveDisplay.setText("WAVE:" + this.currWave); //update display
+            }, [], this); // 3000ms = 3 seconds delay
             //get wave configuration for the current wave
             let waveConfig = this.waves[this.currWave - 1];
         
@@ -497,7 +510,7 @@ class Level extends Phaser.Scene {
             Phaser.Utils.Array.Shuffle(enemiesToActivate);
 
             //activate enemies based on the shuffled order with a delay between each spawn
-            let delay = 0;
+            let delay = 1000;
             let interval = 2500; //delay time interval
 
             for (let i = 0; i < enemiesToActivate.length; i++) 
@@ -510,8 +523,16 @@ class Level extends Phaser.Scene {
                     },
                     callbackScope: this
                 });
-                delay += interval;
+                delay += Phaser.Math.Between(2000, 2800);
             }
+
+            this.time.addEvent({
+                delay: interval * enemiesToActivate.length,
+                callback: () => {
+                    this.waveActive = false;
+                },
+                callbackScope: this
+            });
         } 
         else { //if all waves complete, initiate win sequence
             this.winGame();
@@ -579,6 +600,7 @@ class Level extends Phaser.Scene {
 
     insufficientFundsPopUp(x, y)
     {
+        this.sound.play("soundError", {volume: 0.07});
         this.IFPopUpContainer = this.add.container(0,0);
         //graphics object for the background
         this.IFPopUpBackground = this.add.graphics();
@@ -614,6 +636,7 @@ class Level extends Phaser.Scene {
 
     maxUpgradeLevelPopUp(x, y)
     {
+        this.sound.play("soundError", {volume: 0.07});
         this.MUPopUpContainer = this.add.container(0,0);
         //graphics object for the background
         this.MUPopUpBackground = this.add.graphics();
@@ -685,12 +708,16 @@ class Level extends Phaser.Scene {
     //game ends
     winGame()
     {
+        this.gameEnd = true;
+        this.sound.play("soundWin", {volume: 0.1});
         this.scene.start("endWin");
 
     }
 
     loseGame()
     {
+        this.gameEnd = true;
+        this.sound.play("soundLose", {volume: 0.1});
         this.scene.start("endLose");
 
     }
@@ -709,7 +736,8 @@ class Level extends Phaser.Scene {
 
         //handle wave changes
         //if all enemies inactive, start the next wave
-        if (this.allIA() && this.gameEnd == false){
+        if (this.allIA() && this.gameEnd == false && this.waveActive == false)
+        {
             this.updateWave();
         }
 

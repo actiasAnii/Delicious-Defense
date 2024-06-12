@@ -20,7 +20,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         {
             case 1: //chara
                 this.RANGE = 120;
-                this.COOLDOWN = 120;
+                this.COOLDOWN = 115;
                 this.DAMAGE = 1;
                 this.PROJ_TEXTURE = "p_burger";
                 this.HIGHLIGHT_TEXTURE = "hl_chara";
@@ -40,7 +40,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
 
             case 3: //rigel
                 this.RANGE = 60;
-                this.COOLDOWN = 140;
+                this.COOLDOWN = 150;
                 this.DAMAGE = 2;
                 this.PROJ_TEXTURE = "p_sushi";
                 this.HIGHLIGHT_TEXTURE = "hl_rigel";
@@ -182,6 +182,8 @@ class Turret extends Phaser.Physics.Arcade.Sprite
                 this.scene.points = this.scene.points - 50;
                 this.scene.updatePointDisplay();
 
+                this.scene.sound.play("soundUP", {volume: 0.08});
+
                 //change displayed level if currently being displayed
                 if (this.currLevel && this.currLevel.visible)
                     {
@@ -217,6 +219,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
                     if (proj) 
                         {
                             proj.fire(this.x, this.y, this.target);
+                            this.scene.sound.play("soundFire", {volume: 0.02});
 
                             //reset cooldown to another random number
                             this.cooldown = this.COOLDOWN;

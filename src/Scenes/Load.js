@@ -57,6 +57,17 @@ class Load extends Phaser.Scene {
         this.load.bitmapFont("thick", "thick_8x8.png", "thick_8x8.xml");
 
         //load audio assets
+        this.load.audio("soundPlace", "audio_click1.ogg"); //sound for placing a turret
+        this.load.audio("soundPerish", "audio_jingle_09.ogg"); //sound for upgrading a turret
+        this.load.audio("soundFire", "audio_laser_02.ogg"); //sound for turret firing
+        this.load.audio("soundUP", "audio_jingle_03.ogg"); //sound for enemy death
+        this.load.audio("soundWave", "audio_jingle_16.ogg"); //sound for start of a new wave
+        this.load.audio("soundSwitch", "audio_switch_13.ogg"); //sound for switching selection
+        this.load.audio("soundOuch", "audio_jingle_11.ogg"); //sound for losing health
+        this.load.audio("soundError", "audio_jingle_02.ogg"); //sound for errors
+        this.load.audio("soundLose", "audio_jingle_00.ogg"); //sound for losing the game
+        this.load.audio("soundWin", "audio_jingle_12.ogg"); //sound for upgrading a turret
+
 
     }
 
