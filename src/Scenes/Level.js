@@ -16,6 +16,25 @@ class Level extends Phaser.Scene {
         my.sprite.emptyHearts = [];
         this.costs = [0, 60, 80, 70, 50]; //use to set costs and check if points are sufficient
 
+        this.points = 300;
+        this.pointsCollect = 1500;
+
+        this.placingMode = false;
+        this.highlights = [];
+        this.gridGraphics; 
+
+        this.turretSelected = 1;
+
+        this.currWave = 1;
+                     //format: [opportunities, spirits, sojourners, curiosities, perserverances]
+        this.wave1 = [2, 0, 1, 1, 0];
+        this.wave2 = [1, 3, 0, 1, 0];
+        this.wave3 = [0, 2, 1, 1, 2];
+        this.wave4 = [2, 2, 1, 2, 3];
+        this.waves = [this.wave1, this.wave2, this.wave3, this.wave4];
+
+        this.gameEnd = false;
+
     }
 
     preload()
@@ -34,8 +53,8 @@ class Level extends Phaser.Scene {
         this.town_tileset = this.map.addTilesetImage("tilemap-town_packed", "town_tiles");
 
         //create layers
-        this.groundLayer = this.map.createLayer("Ground-n-Paths", [this.town_tileset], 0, 0);
-        this.decorationLayer = this.map.createLayer("Decoration", [this.town_tileset], 0, 0);
+        this.groundLayer = this.map.createLayer("Ground-n-Paths", [this.town_tileset], 0, 0).setDepth(-100);
+        this.decorationLayer = this.map.createLayer("Decoration", [this.town_tileset], 0, 0).setDepth(-100);
 
         //give path layers a certain property for enemy pathing
         let defenseGrid = this.layersToGrid([this.groundLayer, this.decorationLayer]);
@@ -61,24 +80,36 @@ class Level extends Phaser.Scene {
         my.sprite.playerStandIn = this.add.sprite(this.tiletoWorld(54), this.tiletoWorld(20), "platformer_characters", "tile_0006.png").setScale(0.8);
         my.sprite.playerStandIn.anims.play("friskHop");
 
-        //group to hold enemies and turrets
+        //groups to hold enemies and turrets
         my.turrets = this.add.group({ 
             classType: Turret, 
             runChildUpdate: true
         });
+
         my.enemies = this.add.group();
 
-        //temp test enemy here
-        //later make waves
-        my.sprite.enemyFirst = new Enemy(this, this.tiletoWorld(10), this.tiletoWorld(24), 1, this.finder);
-        my.sprite.enemyFirst.findPath();
+        my.opportunities = this.createEnemies(0, 10);
+        my.spirits = this.createEnemies(1, 10);
+        my.sojourners = this.createEnemies(2, 10);
+        my.curiosities = this.createEnemies(3, 10);
+        my.perseverances = this.createEnemies(4, 10);
 
-        my.enemies.add(my.sprite.enemyFirst);
+        console.log(my.opportunities);
+
+        my.enemies.addMultiple([my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances]);
+
+        //test enemy
+        let activeEnemy = my.opportunities.getChildren()[1];
+        activeEnemy.makeActive();
+
+        // Add the active enemy to the main enemies group
+        my.enemies.add(activeEnemy);
+
+        console.log(activeEnemy);
+
 
         ///////UI
-        this.points = 300;
-        this.pointsCollect = 1500;
-        my.text.resourceTracker = this.add.bitmapText(this.tiletoWorld(4.75), this.tiletoWorld(0.4), "thick", ":" + ("00000" + this.points)
+        my.text.pointTracker = this.add.bitmapText(this.tiletoWorld(4.75), this.tiletoWorld(0.4), "thick", ":" + ("00000" + this.points)
         .slice(-5)).setDepth(100000).setScale(1.2);
         my.sprite.coin = this.add.sprite(this.tiletoWorld(4), 10.5, "coin_1").setDepth(100000);
         my.sprite.coin.anims.play("coinFlip");
@@ -89,7 +120,7 @@ class Level extends Phaser.Scene {
         my.text.pmEnterInstructions.setVisible(true);
 
         //current wave
-        my.text.currentWaveDisplay = this.add.bitmapText(this.tiletoWorld(29.1), this.tiletoWorld(0.8), "thick", "WAVE:1").
+        my.text.currentWaveDisplay = this.add.bitmapText(this.tiletoWorld(29.1), this.tiletoWorld(0.8), "thick", "WAVE:" + this.currWave).
         setOrigin(0.5).setScale(1.2).setDepth(1000);
 
 
@@ -114,24 +145,17 @@ class Level extends Phaser.Scene {
         }
 
         ////////placing mode UI
-        this.placingMode = false;
-        this.highlights = [];
-        this.gridGraphics; 
-
         this.input.keyboard.on('keydown-P', () => {
             this.togglePlacingMode();
         }, this);
 
         this.input.on('pointerdown', this.placeTurret, this);
-        this.turretSelected = 1;
 
         this.menuPopUp();
 
         my.text.placementInstructions = this.add.bitmapText(this.tiletoWorld(28), this.tiletoWorld(25.5), "thick", "click a green tile to place a new turret or click an existing turret with 4 selected to upgrade!!").
         setOrigin(0.5).setScale(0.8).setDepth(1000);
         my.text.placementInstructions.setVisible(false);
-
-        //invalid placement and not enough resources pop ups
 
         //placing mode modes
         this.input.keyboard.on('keydown-ONE', () => {
@@ -259,6 +283,23 @@ class Level extends Phaser.Scene {
         return grid;
     }
 
+    createEnemies(type, count)
+    {
+        let tempGroup = this.add.group({ 
+            classType: Enemy, 
+            runChildUpdate: true
+        });
+
+        for (let i = 0; i < count; i++)
+            {
+                let enemy = new Enemy(this, this.tiletoWorld(9), this.tiletoWorld(25), type, this.finder); //create new enemy offscreen
+                tempGroup.add(enemy); //add to group
+            }
+
+
+        return tempGroup;
+    }
+
     //create a new turret
     placeTurret(pointer) {
         let conversion = this.TILESIZE * this.SCALE;
@@ -274,7 +315,7 @@ class Level extends Phaser.Scene {
             {
             console.log("placing turret of type: " + this.turretSelected);
             this.points -= this.costs[this.turretSelected];
-            this.updateResourceDisplay();
+            this.updatePointDisplay();
 
             let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, this.turretSelected);
             my.turrets.add(turret);
@@ -391,9 +432,9 @@ class Level extends Phaser.Scene {
 
     }
 
-    updateResourceDisplay()
+    updatePointDisplay()
     {
-        my.text.resourceTracker.setText(":" + ("00000" + this.points).slice(-5));
+        my.text.pointTracker.setText(":" + ("00000" + this.points).slice(-5));
     }
 
 
@@ -533,7 +574,7 @@ class Level extends Phaser.Scene {
         {
             this.pointsCollect = 1500;
             this.points += 5;
-            this.updateResourceDisplay();
+            this.updatePointDisplay();
         }
 
     }

@@ -81,7 +81,7 @@ class Load extends Phaser.Scene {
                 suffix: ".png",
                 zeroPad: 4
             }),
-            frameRate: 5,
+            frameRate: 4,
             repeat: -1
         });
 
@@ -109,7 +109,35 @@ class Load extends Phaser.Scene {
                 suffix: ".png",
                 zeroPad: 4
             }),
+            frameRate: 4,
+            repeat: -1
+        });
+
+        //curiosity walking anim
+        this.anims.create({
+            key: 'curiWalk',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 18,
+                end: 19,
+                suffix: ".png",
+                zeroPad: 4
+            }),
             frameRate: 5,
+            repeat: -1
+        });
+
+        //perseverance walking anim
+        this.anims.create({
+            key: 'persWalk',
+            frames: this.anims.generateFrameNames('platformer_characters', {
+                prefix: "tile_",
+                start: 11,
+                end: 12,
+                suffix: ".png",
+                zeroPad: 4
+            }),
+            frameRate: 2,
             repeat: -1
         });
 

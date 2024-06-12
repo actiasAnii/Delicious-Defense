@@ -10,23 +10,47 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         {
             case 0: //opportunity
                 this.SPEED = Phaser.Math.Between (700, 750);
-                this.animation = "oppyWalk";
-                this.scorePoints;
+                this.setTexture("platformer_characters", "tile_0021.png");
+                this.setScale(0.6).setOrigin(0,0);
+                this.ANIMATION = "oppyWalk";
+                this.POINTS = 60;
                 this.MAXHEALTH = 5;
                 break;
 
             case 1: //spirit
                 this.SPEED = Phaser.Math.Between (300, 350);
-                this.animation = "spiritFlap";
-                this.scorePoints;
+                this.setTexture("platformer_characters", "tile_0024.png");
+                this.setScale(0.6).setOrigin(0,0);
+                this.ANIMATION = "spiritFlap";
+                this.POINTS = 30;
                 this.MAXHEALTH = 2;
                 break;
             
             case 2: //sojourner
                 this.SPEED = Phaser.Math.Between (500, 600);
-                this.animation = "sojWalk";
-                this.scorePoints;
+                this.setTexture("platformer_characters", "tile_0015.png");
+                this.setScale(0.8).setOrigin(0,0);
+                this.ANIMATION = "sojWalk";
+                this.POINTS = 25;
+                this.MAXHEALTH = 4;
+                break;
+            
+            case 3: //curiosity
+                this.SPEED = Phaser.Math.Between (350, 450);
+                this.setTexture("platformer_characters", "tile_0018.png");
+                this.setScale(0.7).setOrigin(0,0);
+                this.ANIMATION = "curiWalk";
+                this.POINTS = 40;
                 this.MAXHEALTH = 3;
+                break;
+
+            case 4: //perseverance
+                this.SPEED = Phaser.Math.Between (800, 1000);
+                this.setTexture("platformer_characters", "tile_0011.png");
+                this.setScale(0.9).setOrigin(0,0);
+                this.ANIMATION = "persWalk";
+                this.POINTS = 50;
+                this.MAXHEALTH = 7;
                 break;
 
         }
@@ -41,13 +65,16 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
 
 
         //add sprite to scene
-        this.setScale(0.6).setOrigin(0,0);
+        //this.setScale(0.6).setOrigin(0,0);
         scene.add.existing(this);
         scene.physics.add.existing(this); 
         this.flipX = true;
-        this.anims.play(this.animation, true);
 
-        console.log(this.x, this.y);
+        this.anims.play(this.ANIMATION, true);
+
+        this.findPath();
+
+        this.makeInactive();
 
 
     }
@@ -64,7 +91,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         let toX = Math.floor(my.sprite.donutGoal.x / this.TILESIZE);
         let toY = Math.floor(my.sprite.donutGoal.y / this.TILESIZE);
     
-        console.log('Going from (' + fromX + ',' + fromY + ') to (' + toX + ',' + toY + ')');
+        //console.log('Going from (' + fromX + ',' + fromY + ') to (' + toX + ',' + toY + ')');
     
         this.finder.findPath(fromX, fromY, toX, toY, (path) => {
             if (path === null) {
@@ -86,7 +113,9 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
 
     //move enemy along calculated path
     moveEnemy(path) {
-        if (path.length === 0) return;
+        if (path.length === 0) {
+            return;
+        }
     
         let tweens = [];
     
@@ -119,7 +148,6 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         this.y = this.ORGINY;
         this.x = this.ORGINX;
         this.health = this.MAXHEALTH;
-        //potentially find path again
         this.moveEnemy;
 
     }
@@ -144,6 +172,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                     enemyPerish.destroy(); //destroy the sprite when the animation completes
                 });
                 this.makeInactive();
+                this.scene.points += this.POINTS;
+                this.scene.updatePointDisplay();
 
             }
     }

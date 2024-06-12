@@ -8,7 +8,7 @@ class Projectile extends Phaser.Physics.Arcade.Sprite
         this.SPEED = 260;
         this.scene = scene;
         this.DAMAGE = 1;
-        this.setScale(0.6)
+        this.setScale(0.6).setDepth(-1);
 
         //handle going offscreen
         this.scene.physics.add.existing(this);

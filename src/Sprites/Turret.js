@@ -145,12 +145,12 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         this.LVLPopUpBackground = this.scene.add.graphics();
         this.LVLPopUpBackground.lineStyle(1, 0xffffff, 1);
         this.LVLPopUpBackground.fillStyle(0xfab49b, 0.9);
-        this.LVLPopUpBackground.fillRoundedRect(0, 0, this.scene.tiletoWorld(1.6), this.scene.tiletoWorld(1), 2);
-        this.LVLPopUpBackground.strokeRoundedRect(0, 0, this.scene.tiletoWorld(1.6), this.scene.tiletoWorld(1), 2);
+        this.LVLPopUpBackground.fillRoundedRect(0, 0, this.scene.tiletoWorld(1.6), this.scene.tiletoWorld(0.75), 2);
+        this.LVLPopUpBackground.strokeRoundedRect(0, 0, this.scene.tiletoWorld(1.6), this.scene.tiletoWorld(0.75), 2);
         this.LVLPopUpContainer.add(this.LVLPopUpBackground);
 
         //text
-        this.currLevel = this.scene.add.bitmapText(this.scene.tiletoWorld(0.85), this.scene.tiletoWorld(0.6), "thick", "LVL:"+ this.upgradeLvl).setOrigin(0.5).setScale(0.5);
+        this.currLevel = this.scene.add.bitmapText(this.scene.tiletoWorld(0.85), this.scene.tiletoWorld(0.48), "thick", "LVL:"+ this.upgradeLvl).setOrigin(0.5).setScale(0.5);
         this.LVLPopUpContainer.add(this.currLevel);
 
         //set position and depth
@@ -170,6 +170,12 @@ class Turret extends Phaser.Physics.Arcade.Sprite
             if (this.upgradeLvl <= 3)
             {
                 console.log("turret upgraded"); //temp, change stats
+                this.scene.points = this.scene.points - 50;
+                this.scene.updatePointDisplay();
+                if (this.currLevel && this.currLevel.visible)
+                    {
+                        this.currLevel.setText("LVL:"+ this.upgradeLvl);
+                    }
             }
             else
             {
