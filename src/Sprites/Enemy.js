@@ -27,7 +27,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 break;
             
             case 2: //sojourner
-                this.SPEED = Phaser.Math.Between (500, 600);
+                this.SPEED = Phaser.Math.Between (600, 650);
                 this.setTexture("platformer_characters", "tile_0015.png");
                 this.setScale(0.8).setOrigin(0,0);
                 this.ANIMATION = "sojWalk";
@@ -36,7 +36,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 break;
             
             case 3: //curiosity
-                this.SPEED = Phaser.Math.Between (350, 450);
+                this.SPEED = Phaser.Math.Between (500, 550);
                 this.setTexture("platformer_characters", "tile_0018.png");
                 this.setScale(0.7).setOrigin(0,0);
                 this.ANIMATION = "curiWalk";
@@ -48,7 +48,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 this.SPEED = Phaser.Math.Between (800, 1000);
                 this.setTexture("platformer_characters", "tile_0011.png");
                 this.setScale(0.9).setOrigin(0,0);
-                this.ANIMATION = "persWalk";
+                this.ANIMATION = 'persWalk';
                 this.POINTS = 50;
                 this.MAXHEALTH = 7;
                 break;
@@ -70,11 +70,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         scene.physics.add.existing(this); 
         this.flipX = true;
 
-        this.anims.play(this.ANIMATION, true);
-
-        this.findPath();
-
         this.makeInactive();
+        this.active = false;
 
 
     }
@@ -83,11 +80,11 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
 
     //find the path for the enemy to traverse and start movement
     findPath() {
-        // Convert enemy position from pixels to grid coordinates
+        //convert enemy position from pixels to grid coordinates
         let fromX = Math.floor(this.ORGINX / this.TILESIZE);
         let fromY = Math.floor(this.ORGINY / this.TILESIZE);
     
-        // Convert goal position from pixels to grid coordinates
+        //convert goal position from pixels to grid coordinates
         let toX = Math.floor(my.sprite.donutGoal.x / this.TILESIZE);
         let toY = Math.floor(my.sprite.donutGoal.y / this.TILESIZE);
     
@@ -98,7 +95,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
                 console.warn("Path was not found.");
             } else {
     
-                // Convert path back to pixel coordinates
+                //convert path back to pixel coordinates
                 let pixelPath = path.map(step => ({
                     x: step.x * this.TILESIZE,
                     y: step.y * this.TILESIZE
@@ -108,7 +105,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
             }
         });
     
-        this.finder.calculate(); // Ask EasyStar to compute the path
+        this.finder.calculate(); //ask EasyStar to compute the path
     }
 
     //move enemy along calculated path
@@ -148,7 +145,9 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         this.y = this.ORGINY;
         this.x = this.ORGINX;
         this.health = this.MAXHEALTH;
-        this.moveEnemy;
+        this.findPath();
+        this.anims.play(this.ANIMATION);
+        this.active = true;
 
     }
 
@@ -158,6 +157,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite
         this.setActive(false);
         this.setVisible(false);
         this.y = -1000;
+        this.active = false;
 
     }
 

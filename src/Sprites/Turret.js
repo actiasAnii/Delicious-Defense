@@ -70,7 +70,7 @@ class Turret extends Phaser.Physics.Arcade.Sprite
     }
 
        //find the closest enemy within range
-       findTarget() {
+       /*findTarget() {
         let enemies = my.enemies.getChildren();
         let closestEnemy = null;
         let closestDistance = this.RANGE;
@@ -84,7 +84,26 @@ class Turret extends Phaser.Physics.Arcade.Sprite
         });
 
         this.target = closestEnemy;
-    }
+    }*/
+        findTarget() {
+            let closestEnemy = null;
+            let closestDistance = this.RANGE;
+        
+            //iterate through each enemy group
+            let enemyGroups = [my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances];
+        
+            enemyGroups.forEach(group => {
+                group.getChildren().forEach(enemy => {
+                    let distance = Phaser.Math.Distance.Between(this.x, this.y, enemy.x, enemy.y);
+                    if (distance < closestDistance) {
+                        closestEnemy = enemy;
+                        closestDistance = distance;
+                    }
+                });
+            });
+        
+            this.target = closestEnemy;
+        }
 
     //rotate the turret to face the target enemy
     rotateTurret() {
@@ -170,8 +189,12 @@ class Turret extends Phaser.Physics.Arcade.Sprite
             if (this.upgradeLvl <= 3)
             {
                 console.log("turret upgraded"); //temp, change stats
+
+                //subtract cost from player's points
                 this.scene.points = this.scene.points - 50;
                 this.scene.updatePointDisplay();
+
+                //change displayed level if currently being displayed
                 if (this.currLevel && this.currLevel.visible)
                     {
                         this.currLevel.setText("LVL:"+ this.upgradeLvl);

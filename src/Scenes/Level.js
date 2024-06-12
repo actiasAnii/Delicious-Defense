@@ -14,9 +14,12 @@ class Level extends Phaser.Scene {
 
         my.sprite.fullHearts = [];
         my.sprite.emptyHearts = [];
+        this.health = 4;
+
+
         this.costs = [0, 60, 80, 70, 50]; //use to set costs and check if points are sufficient
 
-        this.points = 300;
+        this.points = 400;
         this.pointsCollect = 1500;
 
         this.placingMode = false;
@@ -25,13 +28,15 @@ class Level extends Phaser.Scene {
 
         this.turretSelected = 1;
 
-        this.currWave = 1;
-                     //format: [opportunities, spirits, sojourners, curiosities, perserverances]
-        this.wave1 = [2, 0, 1, 1, 0];
-        this.wave2 = [1, 3, 0, 1, 0];
-        this.wave3 = [0, 2, 1, 1, 2];
+        this.currWave = 0;
+        //format: [opportunities, spirits, sojourners, curiosities, perserverances]
+        //currently very easy for the sake of testing
+        this.wave1 = [2, 0, 0, 1, 0];
+        this.wave2 = [0, 2, 0, 1, 0];
+        this.wave3 = [0, 0, 0, 1, 2];
         this.wave4 = [2, 2, 1, 2, 3];
         this.waves = [this.wave1, this.wave2, this.wave3, this.wave4];
+        this.waveActive = false;
 
         this.gameEnd = false;
 
@@ -67,7 +72,7 @@ class Level extends Phaser.Scene {
         let walkables = [25];
         this.placeableTiles = this.getPlaceables();
 
-        // Tell EasyStar which tiles can be walked on
+        //tell EasyStar which tiles can be walked on
         this.finder.setAcceptableTiles(walkables);
 
         ////create camera
@@ -94,18 +99,7 @@ class Level extends Phaser.Scene {
         my.curiosities = this.createEnemies(3, 10);
         my.perseverances = this.createEnemies(4, 10);
 
-        console.log(my.opportunities);
-
         my.enemies.addMultiple([my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances]);
-
-        //test enemy
-        let activeEnemy = my.opportunities.getChildren()[1];
-        activeEnemy.makeActive();
-
-        // Add the active enemy to the main enemies group
-        my.enemies.add(activeEnemy);
-
-        console.log(activeEnemy);
 
 
         ///////UI
@@ -190,7 +184,7 @@ class Level extends Phaser.Scene {
     //debug function to highlight specified tiles
     highlightTile(x, y)
     {
-        // Create a simple rectangle or any visual indicator on the map
+        //create colored rectangle on the map
         let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0xacffca, 0.5);
         rect.setOrigin(0);
         this.highlights.push(rect);
@@ -235,13 +229,13 @@ class Level extends Phaser.Scene {
         let graphics = this.add.graphics();
         graphics.lineStyle(1, 0xffffff, 0.5);  //set the line style (color and alpha)
 
-        // Vertical lines
+        //vertical lines
         for (let x = 0; x <= this.map.widthInPixels; x += this.TILESIZE) 
         {
             graphics.lineBetween(x, 0, x, this.map.heightInPixels);
         }
 
-        // Horizontal lines
+        //horizontal lines
         for (let y = 0; y <= this.map.heightInPixels; y += this.TILESIZE) {
             graphics.lineBetween(0, y, this.map.widthInPixels, y);
             
@@ -251,24 +245,21 @@ class Level extends Phaser.Scene {
         return graphics;
     }
 
-     // layersToGrid
     //
-    // Uses the tile layer information in this.map and outputs
-    // an array which contains the tile ids of the visible tiles on screen.
-    // This array can then be given to Easystar for use in path finding.
+    //uses the tile layer information in this.map and outputs an array which contains the tile ids of the visible tiles on screen.
+    //this array can then be given to Easystar for use in path finding.
     layersToGrid(arrayOfLayers) {
         let grid = [];
-        // Initialize grid as two-dimensional array
+        //initialize grid as two-dimensional array
         for (let y = 0; y < this.map.height; y++) 
             {
                 grid[y] = [];
                 for (let x = 0; x < this.map.width; x++) {
-                grid[y][x] = 0; // Initialize all tiles to 0 (or any other default value)
+                grid[y][x] = 0; //initialize all tiles to 0
                 }
             }
 
-        // Loop over layers to find tile IDs, store in grid
-
+        //loop over layers to find tile IDs, store in grid
         arrayOfLayers.forEach(layer => {
             for (let y = 0; y < this.map.height; y++) {
                 for (let x = 0; x < this.map.width; x++) {
@@ -321,10 +312,10 @@ class Level extends Phaser.Scene {
             my.turrets.add(turret);
 
             //make upgradeable
-            // Make the turret interactive
+            //make the turret interactive
             turret.setInteractive();
 
-            // Add event listener for pointer over (hover) events
+            //event listener for pointer over (hover) events
             turret.on('pointerover', function(pointer) {
                 turret.highlightTurret();
                 console.log("hovering");
@@ -342,10 +333,15 @@ class Level extends Phaser.Scene {
                 turret.upgrade();
             });
 
-            //handle collision between this turret and an enemy
-            this.physics.add.overlap(turret.projectiles, my.enemies, (enemy, projectile) => { //why are u like this phaser i hate you
+            //handle collision between this turret projectile and an enemy of any type
+            let enemyGroups = [my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances]; //ugfhhhhh
+
+            //handle collision between this turret projectile and each enemy group
+            enemyGroups.forEach(group => {
+                this.physics.add.overlap(turret.projectiles, group, (enemy, projectile) => { //phaser why are you like this
                 projectile.y = 5000;
                 enemy.takeDamage(projectile);
+                });
             });
     
             //mark the tile as non-placeable
@@ -436,6 +432,68 @@ class Level extends Phaser.Scene {
     {
         my.text.pointTracker.setText(":" + ("00000" + this.points).slice(-5));
     }
+
+    updateWave()
+    {
+        //console.log("prev wave: " + this.currWave)
+        this.currWave++;
+        //console.log("new wave: " + this.currWave)
+
+        if (this.currWave <= 4){ //only four waves in this game
+            my.text.currentWaveDisplay.setText("WAVE:" + this.currWave); //update display
+
+            //get wave configuration for the current wave
+            let waveConfig = this.waves[this.currWave - 1];
+        
+            //create an array to hold all enemies to be activated in this wave
+            let enemiesToActivate = [];
+
+            //iterate over each type in the wave configuration
+            for (let typeIndex = 0; typeIndex < waveConfig.length; typeIndex++)
+            {
+                let enemyCount = waveConfig[typeIndex];
+                //get the correct enemy group based on typeIndex
+                let enemyGroup;
+                switch (typeIndex) 
+                {
+                    case 0: enemyGroup = my.opportunities; break;
+                    case 1: enemyGroup = my.spirits; break;
+                    case 2: enemyGroup = my.sojourners; break;
+                    case 3: enemyGroup = my.curiosities; break;
+                    case 4: enemyGroup = my.perseverances; break;
+                }
+            //add the indicated number of enemies of each type to the array
+            for (let i = 0; i < enemyCount; i++) {
+                enemiesToActivate.push(enemyGroup.getChildren()[i]);
+                }
+            }
+
+            //shuffle the array to randomize the spawn order of enemies
+            Phaser.Utils.Array.Shuffle(enemiesToActivate);
+
+            //activate enemies based on the shuffled order with a delay between each spawn
+            let delay = 0;
+            let interval = 2500; //delay time interval
+
+            for (let i = 0; i < enemiesToActivate.length; i++) 
+            {
+                let enemy = enemiesToActivate[i];
+                this.time.addEvent({
+                    delay: delay,
+                    callback: () => {
+                        enemy.makeActive();
+                    },
+                    callbackScope: this
+                });
+                delay += interval;
+            }
+        } 
+        else { //if all waves complete, initiate win sequence
+            this.winGame();
+        }
+    }
+
+    ///////popups!!
 
 
     //pop up turret creation menu
@@ -566,8 +624,55 @@ class Level extends Phaser.Scene {
 
     }
 
+    //check enemy active
+    //get first inactive enemy in the group
+    getFirstIA(group)
+    {
+        for (let enemy of group.getChildren()) {
+        if (!enemy.active) {
+            return enemy; //return the first inactive enemy
+        }
+    }
+    return null; //return null if no inactive enemy is found
+    }
+
+    //get the first active enemy in the group
+    getFirstA(group)
+    {
+        for (let enemy of group.getChildren()) {
+        if (enemy.active) {
+            return enemy; //return the first active enemy
+        }
+    }
+    return null; //return null if no inactive enemy is found
+    }
+
+    //check if all enemies are inactive
+    allIA()
+    {
+        for (let enemyGroup of my.enemies.getChildren()){
+            if (this.getFirstA(enemyGroup))
+                {
+                    return false; //if any are active, return false
+                }
+        }
+        return true;
+    }
+
+    //game ends
+    winGame()
+    {
+
+    }
+
+    loseGame()
+    {
+
+    }
+
     update()
     {
+        //handle point accumulation
         this.pointsCollect --;
 
         if (this.pointsCollect <= 0)
@@ -576,6 +681,20 @@ class Level extends Phaser.Scene {
             this.points += 5;
             this.updatePointDisplay();
         }
+
+        //handle wave changes
+        //if all enemies inactive, start the next wave
+        if (this.allIA() && this.gameEnd == false){
+            this.updateWave();
+        }
+
+        //if health <= 0, initiate loss sequence
+        if (this.health <= 0 && this.gameEnd == false)
+            {
+                this.loseGame();
+            }
+
+        
 
     }
 

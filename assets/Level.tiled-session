@@ -3,20 +3,20 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "Level.tmx",
+    "activeFile": "WinScreen.tmj",
     "expandedProjectPaths": [
         "."
     ],
     "fileStates": {
         "": {
-            "scaleInDock": 1
+            "scaleInDock": 1.5
         },
         "Level.tmj": {
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 435.3333333333333,
-                "y": 203.33333333333331
+                "x": 435,
+                "y": 201.99999999999997
             }
         },
         "Level.tmj#tilemap-battle_packed": {
@@ -28,9 +28,9 @@
         },
         "Level.tmx": {
             "scale": 1.5,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 556.6666666666666,
+                "x": 492.33333333333326,
                 "y": 249.33333333333337
             }
         },
@@ -41,25 +41,41 @@
         "Level.tmx#tilemap-town_packed": {
             "scaleInDock": 1,
             "scaleInEditor": 1
+        },
+        "WinScreen.tmj": {
+            "scale": 1,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 432.5,
+                "y": 231
+            }
+        },
+        "WinScreen.tmj#tilemap-farm_packed": {
+            "scaleInDock": 1.5
+        },
+        "WinScreen.tmj#tilemap-town_packed": {
+            "scaleInDock": 1.5
         }
     },
     "last.exportedFilePath": "C:/Users/cbrsk/Desktop/School/CMPM120/Delicious-Defense/assets",
     "last.imagePath": "C:/Users/cbrsk/Desktop/School/CMPM120/Delicious-Defense/assets",
-    "map.height": 55,
+    "map.height": 26,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "json",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
-    "map.width": 100,
+    "map.width": 55,
     "openFiles": [
         "Level.tmj",
-        "Level.tmx"
+        "Level.tmx",
+        "WinScreen.tmj"
     ],
     "project": "Level.tiled-project",
     "property.type": "bool",
     "recentFiles": [
         "Level.tmj",
-        "Level.tmx"
+        "Level.tmx",
+        "WinScreen.tmj"
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {
