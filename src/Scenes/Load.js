@@ -1,4 +1,4 @@
-//class load. used for preloading assets some animations
+//class load. used for preloading assets and some animations
 class Load extends Phaser.Scene {
     constructor() 
     {
@@ -10,29 +10,28 @@ class Load extends Phaser.Scene {
         //set path for assets
         this.load.setPath("./assets/");
 
+        ///////tile map and sheet assets
+
         //load characters spritesheet
         this.load.atlas("platformer_characters", "tilemap-characters-packed.png", "tilemap-characters-packed.json");
 
         //load tilemap information
         this.load.image("town_tiles", "tilemap-town_packed.png");
-        //unsure if i have to load character sheet as well
+
         this.load.tilemapTiledJSON("level", "Level.tmj");//level tilemap in JSON
         this.load.tilemapTiledJSON("endScreen", "EndScreen.tmj"); //end screen template tilemap in JSON
-        //load tilemaps for win and lose screens once created
 
         //load map tilemaps as spritesheets
-
         this.load.spritesheet("town_sheet", "tilemap-town_packed.png", {
             //px width/height
             frameWidth: 16,
             frameHeight: 16
         });
 
-        //load particles
-        this.load.multiatlas("kenny-particles", "kenny-particles.json"); //multiatlas ripped from improved platformer
 
         //////load additional assets
 
+        //donut :3
         this.load.image("donut", "donut_classic.png");
         //projectiles
         this.load.image("p_burger", "projectile_burger.png");
@@ -48,7 +47,7 @@ class Load extends Phaser.Scene {
         this.load.image("hl_chara", "hl_c2.png");
         this.load.image("hl_enif", "hl_e2.png");
         this.load.image("hl_rigel", "hl_r2.png");
-        //misc
+        //explosion/sparkles who can say
         this.load.image("sparkle1", "explosion_1.png");
         this.load.image("sparkle2", "explosion_2.png");
         this.load.image("sparkle3", "explosion_2.png");
@@ -73,7 +72,7 @@ class Load extends Phaser.Scene {
 
     create()
     {
-        ///////////////create animations
+        //////////////create animations
 
         //////enemy animations
 
@@ -91,7 +90,7 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
-        //spirit anim
+        //spirit walking anim
         this.anims.create({
             key: 'spiritFlap',
             frames: this.anims.generateFrameNames('platformer_characters', {
@@ -147,7 +146,7 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
-        //////turret animations
+        ///////turret animations
 
         //chara turret anim
         this.anims.create({
@@ -191,7 +190,7 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
-        //main character anim :3
+        //frisk anim
         this.anims.create({
             key: 'friskHop',
             frames: this.anims.generateFrameNames('platformer_characters', {
@@ -206,6 +205,8 @@ class Load extends Phaser.Scene {
         });
 
         ///////misc minor animations
+
+        //coin flipping anim
         this.anims.create({
             key: 'coinFlip',
             frames:[
@@ -217,6 +218,7 @@ class Load extends Phaser.Scene {
 
         });
 
+        //enemy defeat anim
         this.anims.create({
             key: 'perish',
             frames: [

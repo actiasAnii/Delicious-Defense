@@ -7,36 +7,41 @@ class Level extends Phaser.Scene {
 
     init()
     {
-        this.TILESIZE = 16;
+        /////set up initial variables
+
+        this.TILESIZE = 16; //map tilesize
+        //evil positioning
         this.GOALX = this.tiletoWorld(53.5);
         this.GOALY = this.tiletoWorld(18.5);
 
+        //health bar elements
         my.sprite.fullHearts = [];
         my.sprite.emptyHearts = [];
         this.health = 4;
 
+        //point related
+        this.costs = [0, 75, 120, 90, 50]; //use to set costs and check if points are sufficient
+        this.points = 180; //current points player has. start with a healthy amount
 
-        this.costs = [0, 75, 90, 100, 50]; //use to set costs and check if points are sufficient
+        //playing mode elements
+        this.placingMode = false; //whether placing mode is active
+        this.highlights = []; //array to hold highlights
+        this.gridGraphics; //grid
 
-        this.points = 250;
-        this.pointsCollect = 1500;
+        this.turretSelected = 1; //which turret type will be placed when player clicks
 
-        this.placingMode = false;
-        this.highlights = [];
-        this.gridGraphics; 
-
-        this.turretSelected = 1;
-
+        //wave elements
         this.currWave = 0;
-        //format: [opportunities, spirits, sojourners, curiosities, perserverances]
-        //currently very easy for the sake of testing
-        this.wave1 = [1, 0, 0, 2, 0];
-        this.wave2 = [0, 2, 0, 1, 0];
-        this.wave3 = [0, 0, 0, 1, 2];
-        this.wave4 = [1, 1, 1, 1, 1];
-        this.waves = [this.wave1, this.wave2, this.wave3, this.wave4];
         this.waveActive = false;
+        //wave configuration
+        //format: [opportunities, spirits, sojourners, curiosities, perserverances]
+        this.wave1 = [2, 0, 3, 2, 0];
+        this.wave2 = [4, 6, 5, 2, 0];
+        this.wave3 = [6, 8, 7, 7, 5];
+        this.wave4 = [10, 10, 8, 8, 7]; 
+        this.waves = [this.wave1, this.wave2, this.wave3, this.wave4];
 
+        //a game end function should only occur once
         this.gameEnd = false;
 
     }
@@ -52,8 +57,6 @@ class Level extends Phaser.Scene {
         this.map = this.add.tilemap("level", 16, 16, 55, 26);
 
         //add tilesets to map
-        //first parameter: name we gave the tileset in Tiled
-        //second parameter: key for the tilesheet
         this.town_tileset = this.map.addTilesetImage("tilemap-town_packed", "town_tiles");
 
         //create layers
@@ -65,43 +68,47 @@ class Level extends Phaser.Scene {
 
         //create finder for pathfinding
         this.finder = new EasyStar.js();
-
         this.finder.setGrid(defenseGrid);
 
+        //define walkables and placeables
         let walkables = [25];
         this.placeableTiles = this.getPlaceables();
 
         //tell EasyStar which tiles can be walked on
         this.finder.setAcceptableTiles(walkables);
 
-        ////create camera
+        //create camera
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.setZoom(SCALE);
 
+        ///////sprite elements
+
         //create donut goal
         my.sprite.donutGoal = this.add.sprite(this.GOALX, this.GOALY, "donut").setOrigin(0.5).setScale(1.5).setDepth(2);
-        //cute lil player stand it by the donut. like commander of the troops
+
+        //cute lil player stand in by the donut. like commander of the troops
         my.sprite.playerStandIn = this.add.sprite(this.GOALX, this.tiletoWorld(20), "platformer_characters", "tile_0006.png").setScale(0.8);
         my.sprite.playerStandIn.anims.play("friskHop");
 
-        //groups to hold enemies and turrets
+        //group to hold turrets
         my.turrets = this.add.group({ 
             classType: Turret, 
-            runChildUpdate: true
+            runChildUpdate: true //make sure to call each one's update
         });
-
+        //group to hold enemy type groups
         my.enemies = this.add.group();
-
+        //create enemy type groups and fill groups with enemies
         my.perseverances = this.createEnemies(4, 10);
         my.opportunities = this.createEnemies(0, 10);
         my.sojourners = this.createEnemies(2, 10);
         my.spirits = this.createEnemies(1, 10);
         my.curiosities = this.createEnemies(3, 10);
-
+        //add to the consolidated enemy group
         my.enemies.addMultiple([my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances]);
 
 
-        ///////UI
+        ///////general UI
+        //create the point display
         my.text.pointTracker = this.add.bitmapText(this.tiletoWorld(4.75), this.tiletoWorld(0.4), "thick", ":" + ("00000" + this.points)
         .slice(-5)).setDepth(100000).setScale(1.2);
         my.sprite.coin = this.add.sprite(this.tiletoWorld(4), 10.5, "coin_1").setDepth(100000);
@@ -112,9 +119,9 @@ class Level extends Phaser.Scene {
         setOrigin(0.5).setScale(0.9).setDepth(1000);
         my.text.pmEnterInstructions.setVisible(true);
 
+        //indicator of what player is defending
         my.text.defendTheDonut = this.add.bitmapText(this.GOALX, this.GOALY - 18, "thick", "DEFEND").
         setOrigin(0.5).setScale(0.7).setDepth(1000);
-
         //cute defend bob up and down animation
         this.tweens.add({
             targets: my.text.defendTheDonut,
@@ -125,11 +132,9 @@ class Level extends Phaser.Scene {
             repeat: -1          // repeat indefinitely
         });
 
-        //current wave
+        //display current wave
         my.text.currentWaveDisplay = this.add.bitmapText(this.tiletoWorld(29.1), this.tiletoWorld(0.8), "thick", "WAVE:" + this.currWave).
         setOrigin(0.5).setScale(1.2).setDepth(1000);
-
-
 
         //create health bar
         for (let i = 0; i < 4; i++) {
@@ -150,20 +155,24 @@ class Level extends Phaser.Scene {
             emptyHeart.x = offsetX;
         }
 
-        ////////placing mode UI
+        ///////placing mode UI/elements
+        //toggle placing mode on P press
         this.input.keyboard.on('keydown-P', () => {
             this.togglePlacingMode();
         }, this);
 
+        //handle clicks
         this.input.on('pointerdown', this.placeTurret, this);
 
+        //turret options menu
         this.menuPopUp();
 
+        //instructions for how placement works
         my.text.placementInstructions = this.add.bitmapText(this.tiletoWorld(28), this.tiletoWorld(25.5), "thick", "click a green tile to place a new turret or click an existing turret with 4 selected to upgrade!!").
         setOrigin(0.5).setScale(0.8).setDepth(1000);
         my.text.placementInstructions.setVisible(false);
 
-        //placing mode modes
+        //placing mode selections
         this.input.keyboard.on('keydown-ONE', () => {
             this.setMode(1);
         }, this);
@@ -189,6 +198,7 @@ class Level extends Phaser.Scene {
         this.physics.world.drawDebug = false;
 
         //debug scene switch
+        /*
         this.input.keyboard.on('keydown-W', () => {
             this.scene.start("endWin")
         }, this);
@@ -196,22 +206,294 @@ class Level extends Phaser.Scene {
         this.input.keyboard.on('keydown-L', () => {
             this.scene.start("endLose")
         }, this);
+        */
 
 
     }
 
 
-    //helper functions
+    //////////////helper functions
 
-    //debug function to highlight specified tiles
+    //make enemies
+    createEnemies(type, count) //pass type and amount of enemies to create
+    {
+        //make group to hold enemies
+        let tempGroup = this.add.group({ 
+            classType: Enemy, 
+            runChildUpdate: true //make sure to run each ones update function
+        });
+
+        //until count amount has been created
+        for (let i = 0; i < count; i++)
+        {
+            let enemy = new Enemy(this, this.tiletoWorld(9), this.tiletoWorld(25), type, this.finder); //create new enemy
+            tempGroup.add(enemy); //add to group
+        }
+
+        //return the group full of enemies
+        return tempGroup;
+    }
+
+    //create a new turret
+    placeTurret(pointer) 
+    {
+        //get the tile that has been clicked on
+        let conversion = this.TILESIZE * SCALE;
+        let i = Math.floor(pointer.y / conversion);
+        let j = Math.floor(pointer.x / conversion);
+    
+        //check if the tile is placeable, if placing mode is true, and if the selected outcome is not upgrade
+        if (this.placeableTiles[i][j] && this.placingMode == true && this.turretSelected != 4) 
+        {
+            //if player has enough points
+            if (this.points >= this.costs[this.turretSelected])
+            {
+            //subtract correct amount of points from player total
+            this.points -= this.costs[this.turretSelected];
+            this.updatePointDisplay();
+
+            this.sound.play("soundPlace", {volume: 0.1});
+
+            //make a new turre at this tile and add to turret group
+            let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, this.turretSelected);
+            my.turrets.add(turret);
+
+            //make the turret interactive
+            turret.setInteractive();
+
+            //event listener for pointer over (hover) events
+            turret.on('pointerover', function(pointer) {
+                turret.highlightTurret(); //highlight when hovering
+            });
+
+            //event listener for pointer out events
+            turret.on('pointerout', function(pointer) {
+                turret.normalizeTurret(); //reset to normal when cursor moves away
+            });
+
+            //event listener for pointer down (click) events
+            turret.on('pointerdown', function(pointer) {
+                turret.upgrade(); //upgrade if clicked on
+            });
+
+            //handle collision between projectile and enemy
+            let enemyGroups = [my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances]; //ugfhhhhh
+            //handle collision between this turret projectile and each enemy group
+            enemyGroups.forEach(group => {
+                this.physics.add.overlap(turret.projectiles, group, (enemy, projectile) => { //phaser why are you like this
+                projectile.y = 5000;
+                enemy.takeDamage(projectile);
+                });
+            });
+    
+            //mark this tile as non-placeable
+            this.placeableTiles[i][j] = false;
+    
+            //reset placing mode to update if its active
+            if (this.placingMode) {
+                this.togglePlacingMode();
+                this.togglePlacingMode();
+            }
+        }
+        else //player does not have enough points
+        {
+            //show pop up communicating that player does not have enough funds for this action
+            this.insufficientFundsPopUp(pointer.x /SCALE + 5, pointer.y /SCALE - 10);
+        }
+    }   
+    }
+
+    //toggle placing mode based on if placing mode is already true
+    togglePlacingMode()
+    {
+        if (this.placingMode == true)
+        {
+            this.disablePlacingMode();
+        }
+        else 
+        {
+            this.enablePlacingMode();
+
+        }
+
+    }
+    
+    //turn on grid and highlights, swap out some UI
+    enablePlacingMode()
+    {
+        //draw the grid
+        this.gridGraphics = this.drawGrid();
+        //show placement instructions instead of placement mode enter instructions
+        my.text.placementInstructions.setVisible(true);
+        my.text.pmEnterInstructions.setVisible(false);
+        //show the turret menu
+        this.popUpContainer.setVisible(true);
+        //placing mode is active
+        this.placingMode = true;
+        //highlight tiles appropriately
+        for (let y = 0; y < this.placeableTiles.length; y++) {
+            for (let x = 0; x < this.placeableTiles[y].length; x++) {
+                if (this.placeableTiles[y][x]) {
+                    this.highlightTile(x, y);
+                } else {
+                    this.notThisTile(x, y);
+                }
+            }
+        }
+
+    }
+
+    //turn off grid and highlights, swap out some UI
+    disablePlacingMode()
+    {
+        //set placing mode inactive
+        this.placingMode = false;
+        //remove the highlights
+        this.highlights.forEach(highlight => highlight.destroy());
+        this.highlights = [];
+        //clear the grid
+        this.gridGraphics.clear();
+        //turn off menu
+        this.popUpContainer.setVisible(false);
+        //show placement mode enter instructions instead of placement instructions
+        my.text.placementInstructions.setVisible(false);
+        my.text.pmEnterInstructions.setVisible(true);
+
+    }
+
+    //conversion helper method
+    tiletoWorld(tile) 
+    {
+        return tile * this.TILESIZE;
+    }
+
+    ///////update game state
+
+    //set the turret placement type
+    setMode(mode)
+    {
+        //if its different than what is currently set
+        if (this.turretSelected != mode && this.placingMode == true)
+        {
+            //update variable and display
+            this.turretSelected = mode;
+            this.currentText.setText("current selection: " + this.turretSelected);
+            this.sound.play("soundSwitch", {volume: 0.6}); 
+        }
+
+    }
+
+    //update displayed points
+    updatePointDisplay()
+    {
+        my.text.pointTracker.setText(":" + ("00000" + this.points).slice(-5));
+    }
+
+    //update health and displayed health
+    updateHealth()
+    {
+        this.health--;
+        this.sound.play("soundOuch", {volume: 0.08});
+
+        //for each element in the health bar arrays
+        for (let i = 0; i < 4; i++) 
+        {
+            my.sprite.fullHearts[i].visible = i < this.health; //if i is less than current player health, full heart is visible
+            my.sprite.emptyHearts[i].visible = i >= this.health; //if i is greater than current player health, empty heart is visible
+        }
+    }
+
+    //begin a new wave or win scenario
+    updateWave()
+    {
+        //increment wave
+        this.currWave++;
+
+        if (this.currWave <= 4){ //only four waves in this game
+            this.waveActive = true;
+
+            //delayed update so that sounds dont overlap and its not too jarring
+            this.time.delayedCall(1000, () => {
+                this.sound.play('soundWave', {volume: 0.1});
+                //update display
+                my.text.currentWaveDisplay.setText("WAVE:" + this.currWave);
+                //give player some points as a reward
+                this.points += 100;
+                this.updatePointDisplay();
+            }, [], this);
+
+            //get wave configuration for the current wave
+            let waveConfig = this.waves[this.currWave - 1];
+        
+            //create an array to hold all enemies to be activated in this wave
+            let enemiesToActivate = [];
+
+            //iterate over each type in the wave configuration
+            for (let typeIndex = 0; typeIndex < waveConfig.length; typeIndex++)
+            {
+                let enemyCount = waveConfig[typeIndex];
+                //get the correct enemy group based on typeIndex
+                let enemyGroup;
+                switch (typeIndex) 
+                {
+                    case 0: enemyGroup = my.opportunities; break;
+                    case 1: enemyGroup = my.spirits; break;
+                    case 2: enemyGroup = my.sojourners; break;
+                    case 3: enemyGroup = my.curiosities; break;
+                    case 4: enemyGroup = my.perseverances; break;
+                }
+            //add the indicated number of enemies of each type to the array
+            for (let i = 0; i < enemyCount; i++) {
+                enemiesToActivate.push(enemyGroup.getChildren()[i]);
+                }
+            }
+
+            //shuffle the array to randomize the spawn order of enemies
+            Phaser.Utils.Array.Shuffle(enemiesToActivate);
+
+            //activate enemies based on the shuffled order with a delay between each spawn
+            let delay = 800;
+
+            for (let i = 0; i < enemiesToActivate.length; i++) 
+            {
+                let enemy = enemiesToActivate[i];
+                this.time.addEvent({
+                    delay: delay,
+                    callback: () => {
+                        enemy.makeActive();
+                        enemy.health = enemy.MAXHEALTH + (2 * this.currWave)
+                    },
+                    callbackScope: this
+                });
+                delay += Phaser.Math.Between(1000, 2500);
+            }
+
+            //wait a little bit before setting wave active to false 
+            //to prevent game from running through all the waves immediately while there are no enemies at beginning of wave
+            this.time.addEvent({
+                delay: 4000,
+                callback: () => {
+                    this.waveActive = false;
+                },
+                callbackScope: this
+            });
+        } 
+        else { //if all waves complete, initiate win sequence
+            this.winGame();
+        }
+    }
+
+    //////placing mode graphics
+
+    //highlight valid tiles in green
     highlightTile(x, y)
     {
-        //create colored rectangle on the map
         let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0xacffca, 0.5);
         rect.setOrigin(0).setDepth(10);
         this.highlights.push(rect);
     }
 
+    //highlight invalid tiles in red
     notThisTile(x, y)
     {
         let rect = this.add.rectangle(x * this.TILESIZE, y * this.TILESIZE, this.TILESIZE, this.TILESIZE, 0xea9999, 0.5);
@@ -220,7 +502,7 @@ class Level extends Phaser.Scene {
 
     }
 
-    //alternate grid that holds spaces where turrets can be placed
+    //grid that holds spaces where turrets can be placed
     getPlaceables()
     {
         let placeableTiles = [];
@@ -267,7 +549,7 @@ class Level extends Phaser.Scene {
         return graphics;
     }
 
-    //
+
     //uses the tile layer information in this.map and outputs an array which contains the tile ids of the visible tiles on screen.
     //this array can then be given to Easystar for use in path finding.
     layersToGrid(arrayOfLayers) {
@@ -287,7 +569,7 @@ class Level extends Phaser.Scene {
                 for (let x = 0; x < this.map.width; x++) {
                     let tile = layer.getTileAt(x, y);
                     if (tile !== null) {
-                    grid[y][x] = tile.index-1; //was having an off by one error for some reson
+                    grid[y][x] = tile.index-1; //was having an off by one error
                     }
                 }
             }
@@ -296,251 +578,7 @@ class Level extends Phaser.Scene {
         return grid;
     }
 
-    createEnemies(type, count)
-    {
-        let tempGroup = this.add.group({ 
-            classType: Enemy, 
-            runChildUpdate: true
-        });
-
-        for (let i = 0; i < count; i++)
-            {
-                let enemy = new Enemy(this, this.tiletoWorld(9), this.tiletoWorld(25), type, this.finder); //create new enemy offscreen
-                tempGroup.add(enemy); //add to group
-            }
-
-
-        return tempGroup;
-    }
-
-    //create a new turret
-    placeTurret(pointer) {
-        let conversion = this.TILESIZE * SCALE;
-        let i = Math.floor(pointer.y / conversion);
-        let j = Math.floor(pointer.x / conversion);
-    
-        //check if the tile is placeable
-        if (this.placeableTiles[i][j] && this.placingMode == true && this.turretSelected != 4) 
-        {
-            if (this.points >= this.costs[this.turretSelected])
-            {
-            console.log("placing turret of type: " + this.turretSelected);
-            this.points -= this.costs[this.turretSelected];
-            this.updatePointDisplay();
-
-            this.sound.play("soundPlace", {volume: 0.1});
-
-            let turret = new Turret(this, j * this.TILESIZE + this.TILESIZE/2, i * this.TILESIZE + this.TILESIZE/2, this.turretSelected);
-            my.turrets.add(turret);
-
-            //make upgradeable
-            //make the turret interactive
-            turret.setInteractive();
-
-            //event listener for pointer over (hover) events
-            turret.on('pointerover', function(pointer) {
-                turret.highlightTurret();
-            });
-
-            //event listener for pointer out events
-            turret.on('pointerout', function(pointer) {
-                turret.normalizeTurret();
-            });
-
-            //event listener for pointer down (click) events
-            turret.on('pointerdown', function(pointer) {
-                turret.upgrade();
-            });
-
-            //handle collision between this turret projectile and an enemy of any type
-            let enemyGroups = [my.opportunities, my.spirits, my.sojourners, my.curiosities, my.perseverances]; //ugfhhhhh
-
-            //handle collision between this turret projectile and each enemy group
-            enemyGroups.forEach(group => {
-                this.physics.add.overlap(turret.projectiles, group, (enemy, projectile) => { //phaser why are you like this
-                projectile.y = 5000;
-                enemy.takeDamage(projectile);
-                });
-            });
-    
-            //mark the tile as non-placeable
-            this.placeableTiles[i][j] = false;
-            //potentially mark more as nonplaceable
-    
-            //reset placing mode to update it
-            if (this.placingMode) {
-                this.togglePlacingMode();
-                this.togglePlacingMode();
-            }
-        }
-        else 
-        {
-            this.insufficientFundsPopUp(pointer.x /SCALE + 5, pointer.y /SCALE - 10);
-        }
-        }   
-    }
-
-    //toggle placing mode correctly based on if placing mode is true
-    togglePlacingMode()
-    {
-        if (this.placingMode == true)
-        {
-            this.disablePlacingMode();
-        }
-        else 
-        {
-            this.enablePlacingMode();
-
-        }
-
-    }
-    
-    //turn on grid and highlights. maybe also change ui to show relevant information
-    enablePlacingMode()
-    {
-
-        this.gridGraphics = this.drawGrid();
-
-        my.text.placementInstructions.setVisible(true);
-
-        my.text.pmEnterInstructions.setVisible(false);
-
-        this.popUpContainer.setVisible(true);
-
-        this.placingMode = true;
-        for (let y = 0; y < this.placeableTiles.length; y++) {
-            for (let x = 0; x < this.placeableTiles[y].length; x++) {
-                if (this.placeableTiles[y][x]) {
-                    this.highlightTile(x, y);
-                } else {
-                    this.notThisTile(x, y);
-                }
-            }
-        }
-
-    }
-
-    //turn off grid and highlights
-    disablePlacingMode()
-    {
-        this.placingMode = false;
-        this.highlights.forEach(highlight => highlight.destroy());
-        this.highlights = [];
-        this.gridGraphics.clear();
-        this.popUpContainer.setVisible(false);
-        my.text.placementInstructions.setVisible(false);
-        my.text.pmEnterInstructions.setVisible(true);
-
-    }
-
-    tiletoWorld(tile) 
-    {
-        return tile * this.TILESIZE;
-    }
-
-    setMode(mode)
-    {
-        if (this.turretSelected != mode && this.placingMode == true)
-        {
-            this.turretSelected = mode;
-            this.currentText.setText("current selection: " + this.turretSelected);
-            this.sound.play("soundSwitch", {volume: 0.6});
-            
-        }
-
-    }
-
-    updatePointDisplay()
-    {
-        my.text.pointTracker.setText(":" + ("00000" + this.points).slice(-5));
-    }
-
-    updateHealth()
-    {
-        this.health--;
-        this.sound.play("soundOuch", {volume: 0.08});
-
-        //for each element in the health bar arrays
-        for (let i = 0; i < 4; i++) 
-        {
-            my.sprite.fullHearts[i].visible = i < this.health; //if i is less than current player health, full heart is visible
-            my.sprite.emptyHearts[i].visible = i >= this.health; //if i is greater than current player health, empty heart is visible
-        }
-    }
-
-    updateWave()
-    {
-        this.currWave++;
-
-        if (this.currWave <= 4){ //only four waves in this game
-            //this.sound.play("soundWave", {volume: 0.1});
-            this.waveActive = true;
-
-            this.time.delayedCall(1000, () => {
-                this.sound.play('soundWave', {volume: 0.1});
-                my.text.currentWaveDisplay.setText("WAVE:" + this.currWave); //update display
-            }, [], this); // 3000ms = 3 seconds delay
-            //get wave configuration for the current wave
-            let waveConfig = this.waves[this.currWave - 1];
-        
-            //create an array to hold all enemies to be activated in this wave
-            let enemiesToActivate = [];
-
-            //iterate over each type in the wave configuration
-            for (let typeIndex = 0; typeIndex < waveConfig.length; typeIndex++)
-            {
-                let enemyCount = waveConfig[typeIndex];
-                //get the correct enemy group based on typeIndex
-                let enemyGroup;
-                switch (typeIndex) 
-                {
-                    case 0: enemyGroup = my.opportunities; break;
-                    case 1: enemyGroup = my.spirits; break;
-                    case 2: enemyGroup = my.sojourners; break;
-                    case 3: enemyGroup = my.curiosities; break;
-                    case 4: enemyGroup = my.perseverances; break;
-                }
-            //add the indicated number of enemies of each type to the array
-            for (let i = 0; i < enemyCount; i++) {
-                enemiesToActivate.push(enemyGroup.getChildren()[i]);
-                }
-            }
-
-            //shuffle the array to randomize the spawn order of enemies
-            Phaser.Utils.Array.Shuffle(enemiesToActivate);
-
-            //activate enemies based on the shuffled order with a delay between each spawn
-            let delay = 1000;
-            let interval = 2500; //delay time interval
-
-            for (let i = 0; i < enemiesToActivate.length; i++) 
-            {
-                let enemy = enemiesToActivate[i];
-                this.time.addEvent({
-                    delay: delay,
-                    callback: () => {
-                        enemy.makeActive();
-                    },
-                    callbackScope: this
-                });
-                delay += Phaser.Math.Between(2000, 2800);
-            }
-
-            this.time.addEvent({
-                delay: interval * enemiesToActivate.length,
-                callback: () => {
-                    this.waveActive = false;
-                },
-                callbackScope: this
-            });
-        } 
-        else { //if all waves complete, initiate win sequence
-            this.winGame();
-        }
-    }
-
-    ///////popups!!
-
+    /////popups!!
 
     //pop up turret creation menu
     menuPopUp() {
@@ -577,7 +615,7 @@ class Level extends Phaser.Scene {
         this.rigelDesc = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(7.25), "thick", "base speed: slow\nbase range: small\nbase damage: 2").setOrigin(0).setScale(0.6);
         this.popUpContainer.add(this.rigelDesc); this.popUpContainer.add(this.rigelTitle); this.popUpContainer.add(this.rigelKey);
 
-        //orr
+        //orr upgrade
         this.upgradeKey = this.add.sprite(this.tiletoWorld(1.5), this.tiletoWorld(9.75), "sparkle1").setScale(0.85);
         this.upgradeTitle = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(9.25), "thick", "4 - UPGRADE").setOrigin(0).setScale(0.7);
         this.upgradeText = this.add.bitmapText(this.tiletoWorld(3), this.tiletoWorld(9.75), "thick", "spend " +this.costs[4] + "\nupgrade existing turret").setOrigin(0).setScale(0.6);
@@ -588,16 +626,13 @@ class Level extends Phaser.Scene {
         this.currentText = this.add.bitmapText(this.tiletoWorld(5), this.tiletoWorld(11.25), "thick", " current selection: " + this.turretSelected).setOrigin(0.5).setScale(0.75);
         this.popUpContainer.add(this.currentText);
 
-        //close instructions
-        /*this.closeText = this.add.bitmapText(this.tiletoWorld(5), this.tiletoWorld(11.6), "thick", "press x to close this menu").setOrigin(0.5).setScale(0.5);
-        this.popUpContainer.add(this.closeText);*/
-
         //set position and depth
         this.popUpContainer.setPosition(16, 16).setDepth(10000);
         //initially hide the pop-up
         this.popUpContainer.setVisible(false);
     }
 
+    //show pop up if player does not have enough points for something
     insufficientFundsPopUp(x, y)
     {
         this.sound.play("soundError", {volume: 0.07});
@@ -618,7 +653,7 @@ class Level extends Phaser.Scene {
         this.IFPopUpContainer.setPosition(x, y).setDepth(10000);
         //initially hide the pop-up
         this.IFPopUpContainer.setVisible(true);
-
+        //fade out
         this.tweens.add({
             targets: this.IFPopUpContainer,
             alpha: 0,
@@ -634,6 +669,7 @@ class Level extends Phaser.Scene {
 
     }
 
+    //show pop up if max upgrade level of a turret has already been reached
     maxUpgradeLevelPopUp(x, y)
     {
         this.sound.play("soundError", {volume: 0.07});
@@ -654,7 +690,7 @@ class Level extends Phaser.Scene {
         this.MUPopUpContainer.setPosition(x, y).setDepth(10000);
         //initially hide the pop-up
         this.MUPopUpContainer.setVisible(true);
-
+        //fade out
         this.tweens.add({
             targets: this.MUPopUpContainer,
             alpha: 0,
@@ -705,7 +741,8 @@ class Level extends Phaser.Scene {
         return true;
     }
 
-    //game ends
+    //////game ends
+    
     winGame()
     {
         this.gameEnd = true;
@@ -724,15 +761,6 @@ class Level extends Phaser.Scene {
 
     update()
     {
-        //handle point accumulation
-        this.pointsCollect --;
-
-        if (this.pointsCollect <= 0)
-        {
-            this.pointsCollect = 1500;
-            this.points += 5;
-            this.updatePointDisplay();
-        }
 
         //handle wave changes
         //if all enemies inactive, start the next wave
@@ -746,8 +774,6 @@ class Level extends Phaser.Scene {
             {
                 this.loseGame();
             }
-
-        
 
     }
 
